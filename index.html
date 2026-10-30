@@ -3,540 +3,375 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShuttleMate Cloud</title>
+  <title>Shuttle Mate — Supabase Sync</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #f5f7fb;
-      --panel: #ffffff;
-      --ink: #1b2430;
-      --muted: #5e7287;
-      --line: #dfe8f3;
-      --brand: #1768c9;
-      --brand-2: #0c4c9a;
-      --ok: #128b4b;
-      --warn: #d9485f;
-      --shadow: 0 10px 30px rgba(18, 41, 71, 0.08);
+      --bg: #0b1320;
+      --panel: #111d2d;
+      --panel-2: #15273d;
+      --text: #eaf2ff;
+      --muted: #9bb2d0;
+      --brand: #3ea5ff;
+      --brand-2: #7ec8ff;
+      --ok: #2dd4bf;
+      --warn: #ffb703;
+      --danger: #ff5b5b;
+      --line: rgba(255,255,255,0.08);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
-      background: linear-gradient(180deg, #edf4ff 0%, var(--bg) 100%);
-      color: var(--ink);
+      background: linear-gradient(180deg, #0a1020, #111d2d);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 20px;
     }
     .container {
       max-width: 980px;
       margin: 0 auto;
-      padding: 32px 18px 48px;
     }
     .card {
-      background: var(--panel);
+      background: rgba(17, 29, 45, 0.92);
       border: 1px solid var(--line);
       border-radius: 18px;
-      box-shadow: var(--shadow);
       padding: 18px;
-      margin-top: 18px;
-    }
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 14px;
-      align-items: center;
       margin-bottom: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
     }
-    h1 {
-      margin: 0;
-      font-size: clamp(1.7rem, 2.3vw, 2.5rem);
-    }
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #eef7f2;
-      color: var(--ok);
-      border: 1px solid #cfead9;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    .status.offline {
-      background: #fff3f5;
-      color: var(--warn);
-      border-color: #f5d3d9;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: currentColor;
-      display: inline-block;
-    }
+    h1, h2, h3 { margin-top: 0; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      gap: 12px;
     }
     label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      font-size: 12px;
       color: var(--muted);
       margin-bottom: 6px;
     }
     input, button {
-      font: inherit;
-    }
-    input {
       width: 100%;
-      padding: 12px 13px;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink);
-      font-size: 1rem;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
     }
+    input { outline: none; }
     input:focus {
-      outline: 3px solid rgba(23, 104, 201, 0.12);
       border-color: var(--brand);
-    }
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
+      box-shadow: 0 0 0 3px rgba(62,165,255,0.2);
     }
     button {
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(180deg, var(--brand), var(--brand-2));
-      color: white;
-      font-weight: 700;
-      padding: 11px 14px;
       cursor: pointer;
-      transition: transform 0.15s ease, filter 0.15s ease;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #0a1020;
+      font-weight: 700;
+      border: none;
+      transition: transform 0.12s ease;
     }
-    button:hover { filter: brightness(1.03); }
-    button:active { transform: translateY(1px); }
     button.secondary {
-      background: #edf2f9;
-      color: var(--ink);
-      border: 1px solid var(--line);
+      background: #223955;
+      color: var(--text);
     }
-    button.danger {
-      background: linear-gradient(180deg, #ef5b78, #d9485f);
-    }
+    button.danger { background: linear-gradient(135deg, #ff7b54, #ff4d4d); color: white; }
+    button:hover { transform: translateY(-1px); }
     .row {
       display: flex;
-      gap: 10px;
-      align-items: center;
+      gap: 8px;
+      align-items: flex-end;
       flex-wrap: wrap;
     }
+    .status {
+      padding: 10px 12px;
+      background: rgba(46, 204, 113, 0.08);
+      border: 1px solid rgba(46, 204, 113, 0.22);
+      color: var(--text);
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .status.error {
+      background: rgba(255, 91, 91, 0.08);
+      border-color: rgba(255, 91, 91, 0.22);
+    }
     ul {
-      list-style: none;
-      padding: 0;
       margin: 0;
-      display: grid;
-      gap: 8px;
-    }
-    li {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fbfcff;
-    }
-    .muted {
+      padding-left: 18px;
       color: var(--muted);
-    }
-    .pill {
-      font-size: 0.8rem;
-      border-radius: 999px;
-      background: #eef5ff;
-      color: var(--brand);
-      padding: 4px 8px;
-      font-weight: 700;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 8px;
-    }
-    th, td {
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
-      vertical-align: top;
-    }
-    th {
-      color: var(--muted);
-      font-size: 0.8rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .compact {
-      font-size: 0.92rem;
-    }
-    .log {
-      min-height: 24px;
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-    @media (max-width: 650px) {
-      .topbar { align-items: flex-start; }
-      .buttons { flex-direction: column; }
-      .buttons button { width: 100%; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="topbar">
-      <h1>ShuttleMate Cloud</h1>
-      <div id="cloudStatus" class="status offline"><span class="dot"></span> Not connected</div>
-    </div>
-
-    <section class="card">
+    <div class="card">
+      <h1>Shuttle Mate — Cloud Sync</h1>
       <div class="grid">
         <div>
           <label for="supabaseUrl">Supabase URL</label>
-          <input id="supabaseUrl" type="text" placeholder="https://xxxxx.supabase.co" />
+          <input id="supabaseUrl" type="text" placeholder="https://xxx.supabase.co" />
         </div>
         <div>
           <label for="supabaseAnonKey">Anon / Publishable Key</label>
-          <input id="supabaseAnonKey" type="text" placeholder="eyJ..." />
+          <input id="supabaseAnonKey" type="password" placeholder="anon key" />
         </div>
         <div>
-          <label for="space">Space</label>
-          <input id="space" type="text" value="badminton" />
+          <label for="spaceName">Space</label>
+          <input id="spaceName" type="text" value="badminton" />
         </div>
       </div>
-      <div class="buttons">
-        <button id="connectBtn" type="button">Connect to Supabase</button>
-        <button id="loadBtn" type="button" class="secondary">Load from cloud</button>
-        <button id="saveBtn" type="button" class="secondary">Save to cloud</button>
+      <div class="row" style="margin-top: 16px;">
+        <button type="button" id="connectBtn">Connect</button>
+        <button type="button" class="secondary" id="loadBtn">Load from cloud</button>
+        <button type="button" class="secondary" id="saveBtn">Save to cloud</button>
       </div>
-      <div id="log" class="log">Use your Supabase URL and anon key to sync the app state.</div>
-    </section>
+      <div id="status" class="status">Not connected yet.</div>
+    </div>
 
-    <section class="card">
-      <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Players</h2>
-        <span id="playerCount" class="pill">0 players</span>
-      </div>
+    <div class="card">
+      <h2>Players</h2>
       <div class="row">
-        <input id="playerName" type="text" placeholder="Add a player" />
-        <button id="addPlayerBtn" type="button">Add player</button>
+        <input id="playerInput" type="text" placeholder="Add player name" />
+        <button type="button" id="addPlayerBtn">Add player</button>
       </div>
-      <ul id="playerList" style="margin-top: 14px;"></ul>
-    </section>
+      <ul id="playerList"></ul>
+    </div>
 
-    <section class="card">
-      <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Sessions</h2>
-        <span id="sessionCount" class="pill">0 sessions</span>
-      </div>
+    <div class="card">
+      <h2>Sessions</h2>
       <div class="row">
-        <input id="sessionDate" type="date" />
-        <button id="addSessionBtn" type="button">Add session</button>
+        <input id="sessionInput" type="date" />
+        <button type="button" id="addSessionBtn">Add session</button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Players</th>
-            <th>Pairs</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="sessionTableBody"></tbody>
-      </table>
-    </section>
+      <ul id="sessionList"></ul>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const DEFAULT_SPACE = 'badminton';
-    const appState = {
-      players: ['Dev', 'Gagan', 'Mayank', 'Nirav', 'Sunil', 'Sunny'],
-      sessions: []
-    };
+    const STORAGE_KEY = 'shuttle_mate_full_state_v1';
+    const CLOUD_TABLE = 'shuttle_mate_state';
 
-    const config = window.SHUTTLE_CONFIG || {
+    window.SHUTTLE_CONFIG = {
       supabaseUrl: '',
       supabaseAnonKey: '',
-      space: DEFAULT_SPACE
+      space: 'badminton'
+    };
+
+    window.supabaseClient = null;
+
+    const state = {
+      players: ['Dev', 'Gagan', 'Mayank', 'Neeraj', 'Nirav', 'Sachin'],
+      sessions: [
+        { id: 1, date: new Date().toISOString().slice(0, 10), notes: 'Initial session' }
+      ]
     };
 
     const els = {
-      cloudStatus: document.getElementById('cloudStatus'),
+      status: document.getElementById('status'),
+      playerList: document.getElementById('playerList'),
+      sessionList: document.getElementById('sessionList'),
+      playerInput: document.getElementById('playerInput'),
+      sessionInput: document.getElementById('sessionInput'),
       supabaseUrl: document.getElementById('supabaseUrl'),
       supabaseAnonKey: document.getElementById('supabaseAnonKey'),
-      space: document.getElementById('space'),
-      log: document.getElementById('log'),
-      playerName: document.getElementById('playerName'),
-      playerList: document.getElementById('playerList'),
-      playerCount: document.getElementById('playerCount'),
-      sessionDate: document.getElementById('sessionDate'),
-      sessionTableBody: document.getElementById('sessionTableBody'),
-      sessionCount: document.getElementById('sessionCount')
+      spaceName: document.getElementById('spaceName')
     };
 
-    let supabaseClient = null;
-
-    function setLog(msg) {
-      els.log.textContent = msg;
+    function setStatus(message, isError = false) {
+      els.status.textContent = message;
+      els.status.classList.toggle('error', isError);
     }
 
-    function setCloudStatus(connected) {
-      if (connected) {
-        els.cloudStatus.classList.remove('offline');
-        els.cloudStatus.innerHTML = '<span class="dot"></span> Connected';
-      } else {
-        els.cloudStatus.classList.add('offline');
-        els.cloudStatus.innerHTML = '<span class="dot"></span> Not connected';
+    function renderLists() {
+      els.playerList.innerHTML = '';
+      state.players.forEach((name, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${name}`;
+        els.playerList.appendChild(li);
+      });
+
+      els.sessionList.innerHTML = '';
+      state.sessions.forEach((session) => {
+        const li = document.createElement('li');
+        li.textContent = `${session.date} :: ${session.notes || 'No notes'}`;
+        els.sessionList.appendChild(li);
+      });
+    }
+
+    function saveLocal() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn('Local save failed', error);
       }
     }
 
-    function loadLocalState() {
+    function loadLocal() {
       try {
-        const raw = localStorage.getItem('shuttlemate_state');
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         const parsed = JSON.parse(raw);
-        if (parsed.players?.length) appState.players = parsed.players;
-        if (Array.isArray(parsed.sessions)) appState.sessions = parsed.sessions;
+        if (parsed && Array.isArray(parsed.players) && Array.isArray(parsed.sessions)) {
+          state.players = parsed.players;
+          state.sessions = parsed.sessions;
+          renderLists();
+        }
       } catch (error) {
-        console.warn('Could not read local state', error);
+        console.warn('Local load failed', error);
       }
     }
 
-    function persistLocalState() {
-      localStorage.setItem('shuttlemate_state', JSON.stringify(appState));
+    function updateConfigFromInputs() {
+      window.SHUTTLE_CONFIG.supabaseUrl = els.supabaseUrl.value.trim();
+      window.SHUTTLE_CONFIG.supabaseAnonKey = els.supabaseAnonKey.value.trim();
+      window.SHUTTLE_CONFIG.space = (els.spaceName.value || 'badminton').trim();
     }
 
-    function initConfigInputs() {
-      els.supabaseUrl.value = config.supabaseUrl || '';
-      els.supabaseAnonKey.value = config.supabaseAnonKey || '';
-      els.space.value = config.space || DEFAULT_SPACE;
-    }
-
-    function ensureSupabaseClient() {
-      const url = els.supabaseUrl.value.trim();
-      const anonKey = els.supabaseAnonKey.value.trim();
-      if (!url || !anonKey) {
-        setLog('Enter Supabase URL and anon key first.');
+    function initSupabase() {
+      updateConfigFromInputs();
+      const cfg = window.SHUTTLE_CONFIG;
+      if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+        setStatus('Please enter Supabase URL and anon key.', true);
         return null;
       }
 
-      if (!supabaseClient) {
-        supabaseClient = window.supabase.createClient(url, anonKey);
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        setStatus('Supabase SDK not available.', true);
+        return null;
       }
-      return supabaseClient;
-    }
 
-    function renderPlayers() {
-      els.playerList.innerHTML = '';
-      appState.players.forEach((player, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${player}</span>
-          <button class="danger secondary" data-remove-player="${index}" type="button">Remove</button>
-        `;
-        els.playerList.appendChild(li);
-      });
-      els.playerCount.textContent = `${appState.players.length} players`;
-    }
-
-    function generatePairsForPlayers() {
-      const players = [...appState.players];
-      if (players.length < 2) return [];
-      const shuffled = [...players].sort(() => Math.random() - 0.5);
-      const pairs = [];
-      for (let i = 0; i < shuffled.length; i += 2) {
-        if (i + 1 < shuffled.length) {
-          pairs.push([shuffled[i], shuffled[i + 1]]);
-        }
+      if (!window.supabaseClient) {
+        window.supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
       }
-      return pairs;
+
+      return window.supabaseClient;
     }
 
-    function renderSessions() {
-      els.sessionTableBody.innerHTML = '';
-      appState.sessions.forEach((session) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${session.date}</td>
-          <td class="compact">${session.players?.join(', ') || '—'}</td>
-          <td class="compact">${session.pairs?.length ? session.pairs.map(([a, b]) => `${a} + ${b}`).join('<br>') : 'No pairs yet'}</td>
-          <td><button class="secondary" data-generate-pairs="${session.id}" type="button">Generate pairs</button></td>
-        `;
-        els.sessionTableBody.appendChild(tr);
-      });
-      els.sessionCount.textContent = `${appState.sessions.length} sessions`;
-    }
+    async function cloudSaveState() {
+      const client = initSupabase();
+      if (!client) return false;
 
-    function render() {
-      renderPlayers();
-      renderSessions();
-    }
-
-    function addPlayer(name) {
-      const trimmed = name.trim();
-      if (!trimmed) return;
-      if (appState.players.includes(trimmed)) {
-        setLog('That player already exists.');
-        return;
-      }
-      appState.players.push(trimmed);
-      persistLocalState();
-      render();
-      setLog(`Player added: ${trimmed}`);
-    }
-
-    function removePlayer(index) {
-      appState.players.splice(index, 1);
-      persistLocalState();
-      render();
-      setLog('Player removed.');
-    }
-
-    function addSession(dateString) {
-      const date = dateString || new Date().toISOString().slice(0, 10);
-      if (!date) return;
-      if (appState.sessions.some((s) => s.date === date)) {
-        setLog('A session already exists for that date.');
-        return;
-      }
-      appState.sessions.push({ id: Date.now(), date, players: [...appState.players], pairs: generatePairsForPlayers() });
-      persistLocalState();
-      render();
-      setLog(`Session created for ${date}.`);
-    }
-
-    async function connectSupabase() {
-      const client = ensureSupabaseClient();
-      if (!client) return;
+      const payload = {
+        space: window.SHUTTLE_CONFIG.space,
+        payload: JSON.parse(JSON.stringify(state)),
+        updated_at: new Date().toISOString()
+      };
 
       try {
-        const { data, error } = await client.from('app_state').select('space').limit(1);
-        if (error) {
-          throw error;
-        }
-        setCloudStatus(true);
-        setLog('Supabase connected successfully.');
-        config.supabaseUrl = els.supabaseUrl.value.trim();
-        config.supabaseAnonKey = els.supabaseAnonKey.value.trim();
-        config.space = els.space.value.trim() || DEFAULT_SPACE;
-        window.SHUTTLE_CONFIG = { ...config };
+        const { error } = await client
+          .from(CLOUD_TABLE)
+          .upsert(payload, { onConflict: 'space' });
+
+        if (error) throw error;
+        setStatus(`Saved full app state to Supabase table "${CLOUD_TABLE}" for space "${window.SHUTTLE_CONFIG.space}".`);
+        saveLocal();
+        return true;
       } catch (error) {
-        console.error(error);
-        setCloudStatus(false);
-        setLog('Connection failed. Make sure the table exists and RLS is configured.');
+        console.error('Supabase save failed:', error);
+        setStatus('Supabase save failed. Check table exists and policy permissions.', true);
+        return false;
       }
     }
 
-    async function loadFromCloud() {
-      const client = ensureSupabaseClient();
-      if (!client) return;
+    async function cloudLoadState() {
+      const client = initSupabase();
+      if (!client) return false;
 
       try {
         const { data, error } = await client
-          .from('app_state')
-          .select('state')
-          .eq('space', els.space.value.trim() || DEFAULT_SPACE)
+          .from(CLOUD_TABLE)
+          .select('payload')
+          .eq('space', window.SHUTTLE_CONFIG.space)
           .maybeSingle();
 
         if (error && error.code !== 'PGRST116') throw error;
 
-        if (data?.state) {
-          appState.players = Array.isArray(data.state.players) ? data.state.players : appState.players;
-          appState.sessions = Array.isArray(data.state.sessions) ? data.state.sessions : appState.sessions;
-          persistLocalState();
-          render();
-          setLog('State loaded from Supabase.');
-          setCloudStatus(true);
-          return;
+        if (!data || !data.payload) {
+          setStatus('No cloud state was found for this space yet.', true);
+          return false;
         }
 
-        setLog('No cloud state found yet. Save the current app state to create it.');
+        const merged = data.payload;
+        if (Array.isArray(merged.players) && Array.isArray(merged.sessions)) {
+          state.players = merged.players;
+          state.sessions = merged.sessions;
+          renderLists();
+          saveLocal();
+          setStatus(`Loaded full state for space "${window.SHUTTLE_CONFIG.space}" from Supabase.`);
+          return true;
+        }
+
+        setStatus('Cloud payload exists but is not a valid ShuttleMate state object.', true);
+        return false;
       } catch (error) {
-        console.error(error);
-        setLog('Could not load cloud state. Check your table and permissions.');
+        console.error('Supabase load failed:', error);
+        setStatus('Supabase load failed. Check the table and your permissions.', true);
+        return false;
       }
     }
 
-    async function saveToCloud() {
-      const client = ensureSupabaseClient();
-      if (!client) return;
-
-      try {
-        const payload = {
-          space: els.space.value.trim() || DEFAULT_SPACE,
-          state: {
-            players: appState.players,
-            sessions: appState.sessions
-          },
-          updated_at: new Date().toISOString()
-        };
-
-        const { error } = await client
-          .from('app_state')
-          .upsert(payload, { onConflict: 'space' });
-
-        if (error) throw error;
-
-        persistLocalState();
-        setCloudStatus(true);
-        setLog('State saved to Supabase.');
-      } catch (error) {
-        console.error(error);
-        setLog('Save failed. Confirm the table exists and the key has write access.');
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      updateConfigFromInputs();
+      initSupabase();
+      if (window.supabaseClient) {
+        setStatus(`Connected to Supabase for space "${window.SHUTTLE_CONFIG.space}".`);
       }
-    }
-
-    document.getElementById('connectBtn').addEventListener('click', connectSupabase);
-    document.getElementById('loadBtn').addEventListener('click', loadFromCloud);
-    document.getElementById('saveBtn').addEventListener('click', saveToCloud);
-
-    document.getElementById('addPlayerBtn').addEventListener('click', () => {
-      addPlayer(els.playerName.value);
-      els.playerName.value = '';
     });
 
-    document.addEventListener('click', (event) => {
-      const removeTarget = event.target.closest('[data-remove-player]');
-      if (removeTarget) {
-        removePlayer(Number(removeTarget.dataset.removePlayer));
-        return;
-      }
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      await cloudSaveState();
+    });
 
-      const genTarget = event.target.closest('[data-generate-pairs]');
-      if (genTarget) {
-        const id = Number(genTarget.dataset.generatePairs);
-        const session = appState.sessions.find((item) => item.id === id);
-        if (!session) return;
-        session.pairs = generatePairsForPlayers();
-        persistLocalState();
-        render();
-        setLog(`New pairs generated for ${session.date}.`);
-      }
+    document.getElementById('loadBtn').addEventListener('click', async () => {
+      await cloudLoadState();
+    });
+
+    document.getElementById('addPlayerBtn').addEventListener('click', () => {
+      const name = document.getElementById('playerInput').value.trim();
+      if (!name) return;
+      state.players.push(name);
+      document.getElementById('playerInput').value = '';
+      saveLocal();
+      renderLists();
     });
 
     document.getElementById('addSessionBtn').addEventListener('click', () => {
-      addSession(els.sessionDate.value);
-      els.sessionDate.value = '';
+      const date = document.getElementById('sessionInput').value;
+      if (!date) return;
+      state.sessions.push({ id: Date.now(), date, notes: 'New session' });
+      document.getElementById('sessionInput').value = '';
+      saveLocal();
+      renderLists();
     });
 
-    initConfigInputs();
-    loadLocalState();
-    render();
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().slice(0, 10);
+      els.sessionInput.value = today;
+      loadLocal();
+      renderLists();
+
+      const storedUrl = localStorage.getItem('shuttle_supabase_url');
+      const storedKey = localStorage.getItem('shuttle_supabase_key');
+      const storedSpace = localStorage.getItem('shuttle_supabase_space');
+
+      if (storedUrl) els.supabaseUrl.value = storedUrl;
+      if (storedKey) els.supabaseAnonKey.value = storedKey;
+      if (storedSpace) els.spaceName.value = storedSpace;
+
+      updateConfigFromInputs();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      updateConfigFromInputs();
+      localStorage.setItem('shuttle_supabase_url', window.SHUTTLE_CONFIG.supabaseUrl);
+      localStorage.setItem('shuttle_supabase_key', window.SHUTTLE_CONFIG.supabaseAnonKey);
+      localStorage.setItem('shuttle_supabase_space', window.SHUTTLE_CONFIG.space);
+    });
+
+    renderLists();
   </script>
 </body>
 </html>
