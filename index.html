@@ -157,12 +157,15 @@
   <script>
     const STORAGE_KEY = 'shuttle_mate_full_state_v1';
     const CLOUD_TABLE = 'shuttle_mate_state';
+    const DEFAULT_SUPABASE_URL = 'https://jwceahtpouglabhsvbas.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_BaNP8vW5I6uh-GPtHi6EFA_T9nlxoUL';
+    const DEFAULT_SPACE = 'badminton';
     let cloudSyncTimer = null;
 
     window.SHUTTLE_CONFIG = {
-      supabaseUrl: '',
-      supabaseAnonKey: '',
-      space: 'badminton'
+      supabaseUrl: DEFAULT_SUPABASE_URL,
+      supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
+      space: DEFAULT_SPACE
     };
 
     window.supabaseClient = null;
@@ -231,9 +234,9 @@
     }
 
     function updateConfigFromInputs() {
-      window.SHUTTLE_CONFIG.supabaseUrl = els.supabaseUrl.value.trim();
-      window.SHUTTLE_CONFIG.supabaseAnonKey = els.supabaseAnonKey.value.trim();
-      window.SHUTTLE_CONFIG.space = (els.spaceName.value || 'badminton').trim();
+      window.SHUTTLE_CONFIG.supabaseUrl = els.supabaseUrl.value.trim() || DEFAULT_SUPABASE_URL;
+      window.SHUTTLE_CONFIG.supabaseAnonKey = els.supabaseAnonKey.value.trim() || DEFAULT_SUPABASE_ANON_KEY;
+      window.SHUTTLE_CONFIG.space = (els.spaceName.value || DEFAULT_SPACE).trim();
     }
 
     function initSupabase() {
@@ -376,6 +379,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const today = new Date().toISOString().slice(0, 10);
       els.sessionInput.value = today;
+      els.supabaseUrl.value = DEFAULT_SUPABASE_URL;
+      els.supabaseAnonKey.value = DEFAULT_SUPABASE_ANON_KEY;
+      els.spaceName.value = DEFAULT_SPACE;
+
       loadLocal();
       renderLists();
 
@@ -391,6 +398,7 @@
       if (window.SHUTTLE_CONFIG.supabaseUrl && window.SHUTTLE_CONFIG.supabaseAnonKey) {
         initSupabase();
         void cloudLoadState();
+        void cloudSaveState();
       }
     });
 
