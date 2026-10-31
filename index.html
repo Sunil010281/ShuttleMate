@@ -1,418 +1,2986 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shuttle Mate — Supabase Sync</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg: #0b1320;
-      --panel: #111d2d;
-      --panel-2: #15273d;
-      --text: #eaf2ff;
-      --muted: #9bb2d0;
-      --brand: #3ea5ff;
-      --brand-2: #7ec8ff;
-      --ok: #2dd4bf;
-      --warn: #ffb703;
-      --danger: #ff5b5b;
-      --line: rgba(255,255,255,0.08);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: linear-gradient(180deg, #0a1020, #111d2d);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 20px;
-    }
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .card {
-      background: rgba(17, 29, 45, 0.92);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-    }
-    h1, h2, h3 { margin-top: 0; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    input, button {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: var(--panel-2);
-      color: var(--text);
-      padding: 12px 14px;
-      font-size: 14px;
-    }
-    input { outline: none; }
-    input:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(62,165,255,0.2);
-    }
-    button {
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color: #0a1020;
-      font-weight: 700;
-      border: none;
-      transition: transform 0.12s ease;
-    }
-    button.secondary {
-      background: #223955;
-      color: var(--text);
-    }
-    button.danger { background: linear-gradient(135deg, #ff7b54, #ff4d4d); color: white; }
-    button:hover { transform: translateY(-1px); }
-    .row {
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-    .status {
-      padding: 10px 12px;
-      background: rgba(46, 204, 113, 0.08);
-      border: 1px solid rgba(46, 204, 113, 0.22);
-      color: var(--text);
-      border-radius: 10px;
-      margin-top: 10px;
-      font-size: 13px;
-    }
-    .status.error {
-      background: rgba(255, 91, 91, 0.08);
-      border-color: rgba(255, 91, 91, 0.22);
-    }
-    .status.syncing {
-      background: rgba(255, 183, 3, 0.08);
-      border-color: rgba(255, 183, 3, 0.22);
-    }
-    ul {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d7a" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c131f" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shuttle Mate">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏸%3C/text%3E%3C/svg%3E">
+<title>Shuttle Mate</title>
+<meta name="description" content="Shuttle Mate – pairs, courts and live scores">
+<meta property="og:title" content="🏸 Shuttle Mate">
+<meta property="og:description" content="Pairs, courts and live scores for our badminton sessions – Shuttle Mate">
+<meta property="og:type" content="website">
+<style>
+/* ===== Shuttle Mate · design tokens ===== */
+:root{
+  --bg:#f3f6fb;--surface:#fff;--surface2:#f0f4fa;--ink:#13202f;--mute:#64748b;--line:#e2e8f1;
+  --brand:#1768c9;--brand-soft:#e6f0fc;--btn:#1768c9;--btn2:#0f4fa0;
+  --ok:#0e8a4a;--ok-soft:#e0f4ea;--ok-line:#b3e0c6;
+  --warn:#d1344f;--warn-soft:#fde8ec;
+  --gold-soft:#fff3c4;--gold-line:#efd985;--gold-ink:#7a5c00;
+  --amber-soft:#fff6de;--amber-line:#f0d58a;--amber-ink:#8a5a00;
+  --purple:#7c5cc4;--purple-soft:#f1ebfb;--purple-line:#d9cbee;
+  --teal:#0e8a8f;
+  --radius:18px;--radius-sm:12px;
+  --shadow-sm:0 1px 2px rgba(15,35,70,.06),0 2px 8px rgba(15,35,70,.05);
+  --shadow-md:0 6px 24px rgba(15,35,70,.12);
+  --nav-h:68px;
+  color-scheme:light dark;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0c131f;--surface:#141d2c;--surface2:#1b2638;--ink:#e8eef6;--mute:#93a2b7;--line:#27344a;
+    --brand:#6aaaf2;--brand-soft:#16304f;--btn:#1d6fd0;--btn2:#14509e;
+    --ok:#43d391;--ok-soft:#10301f;--ok-line:#1f5a3a;
+    --warn:#ff7388;--warn-soft:#3a1822;
+    --gold-soft:#3a3110;--gold-line:#5e5018;--gold-ink:#f0d56a;
+    --amber-soft:#33290f;--amber-line:#5b4817;--amber-ink:#f0c766;
+    --purple:#a98ae6;--purple-soft:#271e3d;--purple-line:#46356f;
+    --teal:#35c3c9;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);--shadow-md:0 8px 28px rgba(0,0,0,.55);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.4;-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(var(--nav-h) + 22px + env(safe-area-inset-bottom))}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 55%,transparent);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ===== header ===== */
+header{background:linear-gradient(135deg,#1768c9 0%,#0b3d7a 60%,#0a2f61 100%);color:#fff;
+  padding:calc(14px + env(safe-area-inset-top)) 16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border-radius:0 0 26px 26px;box-shadow:0 8px 24px rgba(11,61,122,.28);position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-40px;top:-60px;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,0) 70%);pointer-events:none}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  display:grid;place-items:center;font-size:24px;line-height:1;backdrop-filter:blur(6px)}
+.brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.2px}
+.brand .tagline{margin:1px 0 0;font-size:12px;font-weight:500;letter-spacing:.5px;opacity:.85}
+header .hbtn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;
+  padding:10px 16px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;position:relative;z-index:1;
+  backdrop-filter:blur(6px);transition:transform .12s,background .2s}
+header .hbtn:active{transform:scale(.96);background:rgba(255,255,255,.28)}
+header .hbtn svg{width:16px;height:16px}
+
+/* ===== bottom navigation ===== */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:center;
+  padding:0 8px calc(8px + env(safe-area-inset-bottom));pointer-events:none}
+nav .bar8{pointer-events:auto;display:flex;width:100%;max-width:560px;background:color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);
+  border:1px solid var(--line);border-radius:22px;padding:5px;box-shadow:var(--shadow-md)}
+nav button{flex:1;min-width:0;border:0;background:transparent;border-radius:16px;padding:7px 0 6px;font-size:10px;font-weight:600;
+  color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .2s,color .2s,transform .12s}
+nav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav button:active{transform:scale(.93)}
+nav button.active{color:var(--brand);background:var(--brand-soft);font-weight:800}
+
+/* ===== layout ===== */
+main{max-width:720px;margin:0 auto;padding:16px 12px}
+main section{animation:rise .25s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+h2{margin:0 0 10px;font-size:17px;font-weight:800;letter-spacing:-.15px}
+h3{margin:16px 0 4px;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.muted{color:var(--mute);font-size:13px}
+input[type=text],input[type=password],input[type=date],input[type=number],select,textarea{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  font-size:16px;background:var(--surface);color:var(--ink);font-family:inherit;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 20%,transparent)}
+textarea{resize:vertical;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:13px}
+select{appearance:none;-webkit-appearance:none;padding-right:34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+
+/* ===== buttons ===== */
+.btn{background:linear-gradient(180deg,var(--btn),var(--btn2));color:#fff;border:0;padding:14px 16px;border-radius:var(--radius-sm);font-size:15px;font-weight:700;
+  width:100%;margin-top:10px;min-height:48px;box-shadow:0 2px 8px color-mix(in srgb,var(--btn) 35%,transparent);transition:transform .1s,filter .15s,box-shadow .15s}
+.btn:active{transform:scale(.98);filter:brightness(.94)}
+.btn:disabled{opacity:.45;box-shadow:none}
+.btn.sec{background:var(--surface2);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+.btn.danger{background:linear-gradient(180deg,#e04560,#c4314b);color:#fff;box-shadow:0 2px 8px rgba(196,49,75,.3)}
+.btn.sm{width:auto;padding:10px 16px;font-size:14px;margin:0;min-height:44px}
+.btn small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:2px}
+.btn.fin{background:linear-gradient(180deg,#14a35a,#0e8a4a);box-shadow:0 2px 8px rgba(14,138,74,.3)}
+.btn.start{background:linear-gradient(180deg,#9275cf,#7458b3);box-shadow:0 2px 8px rgba(124,92,196,.3)}
+.btn.lock{background:var(--surface2);color:var(--mute);box-shadow:none;border:1px solid var(--line)}
+.btn.wa{background:linear-gradient(180deg,#2fe073,#1fbd5b);color:#052f17;box-shadow:0 2px 8px rgba(37,211,102,.3)}
+.btn.wa small{opacity:.75}
+.btn.endgame{background:linear-gradient(180deg,#e04560,#c4314b)}
+@media(min-width:700px){.btn{width:auto;min-width:260px}.btn.sm{min-width:0}.hs-acts .btn{min-width:0}}
+.sbar,.row2,.urlrow,.prow{display:flex;gap:8px;align-items:center}
+.sbar select{flex:1;min-width:0}
+.row2 input,.urlrow input,.prow input{flex:1;min-width:0}
+.urlrow{margin-top:8px}
+.prow{margin-bottom:8px}
+.prow.off input{opacity:.5}
+.prow .btn{width:auto;margin:0;padding:10px 12px;font-size:13px;min-height:44px;min-width:0}
+.bar{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar>div{height:100%;background:linear-gradient(90deg,#14a35a,#43d391);border-radius:99px;transition:width .35s}
+
+/* ===== matches ===== */
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.court{font-size:12px;font-weight:800;color:#fff;background:var(--brand);border-radius:8px;padding:4px 11px;letter-spacing:.3px}
+.court.c1{background:#1768c9}.court.c2{background:#8764b8}.court.c3{background:#0e8a8f}
+.match{border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:10px;background:var(--surface);transition:border-color .2s,background .2s}
+.match.done{border-color:var(--ok-line);background:color-mix(in srgb,var(--ok-soft) 45%,var(--surface))}
+.match.livem{border-color:var(--ok-line);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 14%,transparent)}
+.side{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0}
+.side+.side{border-top:1px dashed var(--line)}
+.side.win{background:var(--ok-soft);border-radius:12px;padding:7px 9px;margin:2px -5px}
+.side.win+.side,.side+.side.win{border-top-color:transparent}
+.team{display:flex;align-items:center;gap:8px;font-size:14.5px;line-height:1.25;flex:1;min-width:0}
+.team.win{font-weight:800;color:var(--ok)}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:48px;height:48px;border-radius:50%;border:0;background:var(--surface2);font-size:26px;font-weight:700;color:var(--ink);
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .08s,background .15s}
+.step button.plus{background:linear-gradient(180deg,var(--btn),var(--btn2));color:#fff}
+.step button:active{transform:scale(.9)}
+.step input{width:54px;height:48px;padding:0;border:1.5px solid var(--line);border-radius:14px;font-size:24px;font-weight:800;text-align:center;-moz-appearance:textfield}
+.step input::-webkit-outer-spin-button,.step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.big{font-size:24px;font-weight:800;min-width:40px;text-align:center}
+.rest{background:var(--surface2);border-radius:10px;padding:8px 11px;font-size:13px;color:var(--mute);margin-top:6px}
+.rh{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;margin:-16px -16px 12px;padding:12px 16px;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0}
+.rh .rt{font-size:17px;font-weight:800}.rh .rs{font-size:12px;color:var(--mute);margin-left:auto}
+.rh.cur{background:var(--brand-soft)}.rh.cur .rs{margin-left:0}.rh.cur .chip{margin-left:auto}
+
+/* ===== chips, tags, badges ===== */
+.chip{font-size:11px;font-weight:800;border-radius:99px;padding:4px 11px;background:var(--surface2);color:var(--mute);letter-spacing:.3px;white-space:nowrap}
+.chip.lv{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--ok-line);color:var(--ok);padding:3px 11px}
+.chip.done{background:var(--ok-soft);color:var(--ok)}
+.gdot{width:9px;height:9px;border-radius:50%;background:#16a34a;display:inline-block;flex:none}
+.gdot.blink{animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;margin-top:3px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.no{background:var(--surface2);color:var(--mute)}.tag.live{background:var(--brand-soft);color:var(--brand)}
+.badge{font-size:11px;background:var(--surface2);color:var(--mute);border-radius:99px;padding:2px 9px;white-space:nowrap}
+
+/* ===== banners ===== */
+.banner,.fbanner,.sbanner,.pbanner,.note,.bkstat{border-radius:var(--radius-sm);padding:12px 14px;font-size:14px}
+.banner{background:var(--amber-soft);border:1px solid var(--amber-line);margin-bottom:14px}
+.fbanner{background:var(--ok-soft);border:1px solid var(--ok-line);margin-bottom:14px}
+.sbanner{background:var(--purple-soft);border:1px solid var(--purple-line);margin-bottom:14px}
+.pbanner{background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 30%,transparent);margin-bottom:14px;font-size:13px}
+.note{background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 25%,transparent);font-size:13px;margin-top:10px}
+.bkstat{background:var(--surface2);font-size:13px;margin-bottom:4px}
+
+/* ===== segmented control ===== */
+.seg{display:flex;background:var(--surface2);border-radius:14px;padding:4px;margin-bottom:12px;border:1px solid var(--line)}
+.seg button{flex:1;border:0;background:transparent;padding:10px;border-radius:10px;font-size:14px;font-weight:600;color:var(--mute);transition:all .2s}
+.seg button.on{background:var(--surface);color:var(--brand);font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+
+/* ===== tables ===== */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 4px;text-align:center;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+td.name,th.name{text-align:left}
+tr.top td{background:var(--gold-soft);font-weight:700}
+tr.top td:first-child{border-radius:10px 0 0 10px}tr.top td:last-child{border-radius:0 10px 10px 0}
+table.st th,table.st td{padding:10px 2px;font-size:13px}table.st td.name{font-size:13.5px}
+table.pl td,table.pl th{padding:8px 3px;font-size:13px}
+td.w{color:var(--ok);font-weight:800}td.l{color:var(--warn);font-weight:800}
+table.hm td{padding:8px 3px;font-size:13px}table.hm td.sc{white-space:nowrap;font-weight:800}table.hm td.win{font-weight:800;color:var(--ok)}
+details.pm{border:1px solid var(--line);border-radius:14px;padding:0 12px;margin-bottom:8px;background:var(--surface)}
+details.pm summary{padding:12px 0;cursor:pointer;font-size:14px;display:flex;justify-content:space-between;gap:8px;list-style:none}
+details.pm summary::-webkit-details-marker{display:none}
+details.pm summary span:last-child{color:var(--mute);white-space:nowrap}
+
+/* ===== availability matrix ===== */
+.wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -8px;padding:0 8px}
+table.av{width:auto;min-width:100%;border-collapse:separate;border-spacing:0}
+table.av th,table.av td{min-width:78px;padding:0;border-bottom:1px solid var(--line);background:var(--surface)}
+table.av th.name,table.av td.name{position:sticky;left:0;z-index:2;min-width:98px;max-width:112px;padding:0 8px;text-align:left;font-size:14px;font-weight:600;
+  border-right:1px solid var(--line);background:var(--surface)}
+table.av th{padding:10px 2px;text-transform:none;font-size:12px;color:var(--ink);line-height:1.25;letter-spacing:0}
+table.av th small{display:block;color:var(--mute);font-weight:400}
+table.av th.cur{background:var(--brand-soft);color:var(--brand)}
+.cb{display:flex;align-items:center;justify-content:center;height:50px;cursor:pointer}
+.cb input{width:26px;height:26px;accent-color:var(--brand)}
+td.cnt{font-weight:800;font-size:15px;padding:10px 2px}td.cnt.bad{color:var(--warn)}td.cnt.good{color:var(--ok)}
+.acts{display:flex;flex-direction:column;gap:6px;padding:10px 4px}
+.acts button{border:0;border-radius:10px;padding:10px 2px;font-size:12px;font-weight:700;background:var(--surface2);color:var(--ink);min-height:38px}
+.acts button.go{background:var(--btn);color:#fff}.acts button.del{background:var(--warn-soft);color:var(--warn)}
+.acts button.lock{color:var(--mute)}
+
+/* ===== avatars ===== */
+.pavs{display:inline-flex;flex:none}.pavs .pav+.pav{margin-left:-6px}
+.pav{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;color:#fff;font-size:10px;font-weight:800;
+  border:2px solid var(--surface);box-shadow:0 0 0 1px rgba(0,0,0,.06);flex:none;letter-spacing:.2px}
+td.name .pav,summary .pav{width:24px;height:24px;font-size:9px;vertical-align:middle}
+td.name .pavs,summary .pavs{margin-right:7px;vertical-align:middle}td.name>.pav{margin-right:7px}
+.fxrow{display:flex;gap:12px;align-items:flex-start;font-size:15px}.fxrow input{width:22px;height:22px;margin-top:1px;flex:none;accent-color:var(--brand)}
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:rgba(19,32,47,.94);color:#fff;
+  padding:12px 18px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:120;
+  max-width:92%;text-align:center;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== history ===== */
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-top:4px}
+.stats4 div{background:var(--surface2);border-radius:14px;padding:10px 2px}
+.stats4 b{display:block;font-size:22px;font-weight:800;color:var(--brand)}.stats4 span{font-size:11px;color:var(--mute)}
+.filters{display:flex;flex-direction:column;gap:10px}
+details.hs{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;box-shadow:var(--shadow-sm)}
+details.hs[open]{border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}
+details.hs summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px}
+details.hs summary::-webkit-details-marker{display:none}
+details.hs summary .chev{color:var(--mute);font-size:24px;transition:transform .2s}
+details.hs[open] summary .chev{transform:rotate(90deg)}
+.hs-main{min-width:0;flex:1}.hs-title{font-weight:800;font-size:15px}.hs-sub{font-size:13px;color:var(--mute);margin-top:2px}
+.hs-me{font-size:13px;margin-top:3px;color:var(--brand);font-weight:700}
+.hs-body{padding:0 16px 16px;border-top:1px solid var(--line)}
+.hs-body ol{margin:6px 0 0;padding-left:20px;font-size:14px}
+.hs-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hs-acts .btn{flex:1 1 130px;width:auto;margin:0;padding:10px 12px;font-size:14px}
+.snap{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.snap:last-child{border-bottom:0}.snap .btn{width:auto;margin:0;padding:8px 12px;font-size:13px;min-height:40px;min-width:0}
+
+/* ===== best pairs ===== */
+.bp-top{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--gold-soft),color-mix(in srgb,var(--gold-soft) 70%,var(--gold-line)));
+  border:1px solid var(--gold-line);border-radius:var(--radius-sm);padding:12px 14px;margin:8px 0 12px}
+.bp-top+.bp-top{margin-top:-4px}.bp-top .tr{font-size:32px;line-height:1}.bp-top .nm{font-weight:800;font-size:16px;line-height:1.25}
+.bp-top .ds{font-size:13px;color:var(--gold-ink);margin-top:2px}
+.bp-top .lbl{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--gold-ink)}
+table.bp{width:100%;border-collapse:collapse}
+table.bp th{font-size:11px;color:var(--mute);text-align:center;padding:7px 2px;border-bottom:1px solid var(--line);font-weight:700}
+table.bp td{font-size:13px;text-align:center;padding:9px 2px;border-bottom:1px solid var(--line)}
+table.bp th.name,table.bp td.name{text-align:left;padding-left:2px}table.bp td.name{font-size:13.5px}
+table.bp tr.lead td{background:var(--gold-soft);font-weight:800}
+table.bp td.pos{color:var(--ok)}table.bp td.neg{color:var(--warn)}
+
+/* ===== play tab ===== */
+.play-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.play-grid label{font-size:12px;font-weight:800}.play-grid select{margin-top:5px}
+.play-grid label.pa{color:var(--brand)}.play-grid label.pa select{border-color:var(--brand)}
+.play-grid label.pb{color:#c35a00}.play-grid label.pb select{border-color:#c35a00}
+@media(prefers-color-scheme:dark){.play-grid label.pb{color:#ffa45c}.play-grid label.pb select{border-color:#ffa45c}}
+.play-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
+.play-actions .btn{flex:1 1 150px;min-width:0}
+.play-actions .btn.startgame{background:linear-gradient(180deg,#14a35a,#0e8a4a);width:auto;flex:0 0 auto;padding:11px 26px;font-size:15px;margin-top:12px}
+.game-card{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:var(--surface)}
+.game-card.live-game{border-color:var(--ok-line);background:color-mix(in srgb,var(--ok-soft) 45%,var(--surface))}
+.game-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.game-pairs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center}
+.game-pairs b{font-size:14.5px;line-height:1.3}.game-pairs span{color:var(--mute);font-weight:700;font-size:12px}
+.game-score{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:14px}
+.game-score input{width:78px;height:54px;padding:0;border:1.5px solid var(--line);border-radius:14px;font-size:26px;font-weight:800;text-align:center}
+.game-score b{font-size:24px;color:var(--mute)}
+.player-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.player-chip{border:1px solid var(--line);border-radius:99px;padding:6px 11px;font-size:12px;font-weight:600;background:var(--surface)}
+.player-chip.busy{background:var(--amber-soft);border-color:var(--amber-line);color:var(--amber-ink)}
+.hg{padding:10px 0;border-top:1px solid var(--line)}.hg .hg-meta{font-size:11px;color:var(--mute);margin-bottom:3px}
+.hg .hg-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hg .hg-w{flex:1 1 140px;font-weight:800;color:var(--ok)}.hg .hg-s{font-weight:800;font-size:18px;white-space:nowrap}
+.hg .hg-l{flex:1 1 120px;text-align:right;color:var(--mute);font-size:13px}
+.hg .hg-x{border:0;background:transparent;color:var(--warn);font-size:12px;padding:2px 4px;font-weight:700}
+.gdone{border:1px solid var(--gold-line);background:linear-gradient(135deg,var(--gold-soft),color-mix(in srgb,var(--gold-soft) 70%,var(--gold-line)));border-radius:16px;padding:14px;margin-bottom:12px}
+.gdone .gd-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--gold-ink);font-weight:800;margin-bottom:6px}
+.gdone .gd-win{display:flex;align-items:center;gap:10px}.gdone .gd-cup{font-size:36px;line-height:1}
+.gdone .gd-wn{font-weight:800;font-size:17px;line-height:1.25;color:var(--ok)}
+.gdone .gd-sc{font-size:30px;font-weight:800;margin-left:auto;white-space:nowrap}.gdone .gd-sc span{font-size:20px;color:var(--mute);font-weight:700}
+.gdone .gd-lose{margin-top:6px;font-size:13px;color:var(--gold-ink)}
+@media(max-width:420px){.play-grid{grid-template-columns:1fr}.game-pairs{grid-template-columns:1fr}.game-pairs span{display:none}.stats4 b{font-size:19px}}
+
+/* ===== dialogs & pair editor ===== */
+.dlg-ov,.pe-ov{position:fixed;inset:0;background:rgba(8,16,28,.55);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .18s ease}
+.dlg{background:var(--surface);color:var(--ink);border-radius:20px;padding:20px;max-width:420px;width:100%;box-shadow:var(--shadow-md);max-height:80vh;overflow:auto;animation:pop .2s ease}
+.dlg p{white-space:pre-wrap;font-size:15px;line-height:1.5;margin:0 0 16px}
+.dlg .row{display:flex;gap:10px;justify-content:flex-end}
+.dlg button{border:0;border-radius:12px;padding:12px 20px;font-size:15px;font-weight:700;min-height:46px}
+.dlg button.cancel{background:var(--surface2);color:var(--ink)}.dlg button.ok{background:linear-gradient(180deg,var(--btn),var(--btn2));color:#fff}
+@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes sheet{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+.pe-ov{align-items:flex-end;padding:0;z-index:90}
+.pe-box{background:var(--surface);width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.3);animation:sheet .25s ease}
+@media(min-width:700px){.pe-ov{align-items:center}.pe-box{border-radius:22px}}
+.pe-h{padding:18px 18px 8px}.pe-h h2{margin:0 0 4px;font-size:18px}
+.pe-b{padding:4px 18px 8px;overflow:auto;flex:1}
+.pe-row{border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:10px}
+.pe-row .pl{font-size:12px;font-weight:800;color:var(--mute);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.pe-sel{display:flex;gap:8px}.pe-sel select{flex:1;min-width:0;padding:11px;font-size:15px}
+.pe-row.warn{border-color:var(--amber-line);background:var(--amber-soft)}.pe-row .rw{color:var(--amber-ink)}
+.pe-row.out{background:var(--surface2);border-style:dashed}
+.pe-f{display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.pe-f .btn{margin:0;flex:1;min-width:0}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* ===== cloud sync dot ===== */
+.logo{position:relative}
+.syncdot{position:absolute;right:-4px;bottom:-4px;width:15px;height:15px;border-radius:50%;border:2.5px solid #0b3d7a;background:#9aa7b8}
+.syncdot[data-s=idle]{background:#2fd47a}
+.syncdot[data-s=pending],.syncdot[data-s=syncing]{background:#ffc43d;animation:blink 1.1s infinite}
+.syncdot[data-s=error],.syncdot[data-s=conflict]{background:#ff5470}
+
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>Shuttle Mate — Cloud Sync</h1>
-      <div class="grid">
-        <div>
-          <label for="supabaseUrl">Supabase URL</label>
-          <input id="supabaseUrl" type="text" placeholder="https://xxx.supabase.co" />
-        </div>
-        <div>
-          <label for="supabaseAnonKey">Anon / Publishable Key</label>
-          <input id="supabaseAnonKey" type="password" placeholder="anon key" />
-        </div>
-        <div>
-          <label for="spaceName">Space</label>
-          <input id="spaceName" type="text" value="badminton" />
-        </div>
-      </div>
-      <div class="row" style="margin-top: 16px;">
-        <button type="button" id="connectBtn">Connect</button>
-        <button type="button" class="secondary" id="loadBtn">Load from cloud</button>
-        <button type="button" class="secondary" id="saveBtn">Save to cloud</button>
-      </div>
-      <div id="status" class="status">Not connected yet.</div>
-    </div>
-
-    <div class="card">
-      <h2>Players</h2>
-      <div class="row">
-        <input id="playerInput" type="text" placeholder="Add player name" />
-        <button type="button" id="addPlayerBtn">Add player</button>
-      </div>
-      <ul id="playerList"></ul>
-    </div>
-
-    <div class="card">
-      <h2>Sessions</h2>
-      <div class="row">
-        <input id="sessionInput" type="date" />
-        <button type="button" id="addSessionBtn">Add session</button>
-      </div>
-      <ul id="sessionList"></ul>
-    </div>
+<header>
+  <div class="brand">
+    <div class="logo" id="logoBtn">🏸<i class="syncdot" id="syncDot" data-s="off" hidden></i></div>
+    <div><h1>Shuttle Mate</h1><p class="tagline">Pair Up. Play On.</p></div>
   </div>
-
-  <script>
-    const STORAGE_KEY = 'shuttle_mate_full_state_v1';
-    const CLOUD_TABLE = 'shuttle_mate_state';
-    const DEFAULT_SUPABASE_URL = 'https://jwceahtpouglabhsvbas.supabase.co';
-    const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_BaNP8vW5I6uh-GPtHi6EFA_T9nlxoUL';
-    const DEFAULT_SPACE = 'badminton';
-    let cloudSyncTimer = null;
-
-    window.SHUTTLE_CONFIG = {
-      supabaseUrl: DEFAULT_SUPABASE_URL,
-      supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
-      space: DEFAULT_SPACE
-    };
-
-    window.supabaseClient = null;
-
-    const state = {
-      players: ['Dev', 'Gagan', 'Mayank', 'Neeraj', 'Nirav', 'Sachin'],
-      sessions: [
-        { id: 1, date: new Date().toISOString().slice(0, 10), notes: 'Initial session' }
-      ]
-    };
-
-    const els = {
-      status: document.getElementById('status'),
-      playerList: document.getElementById('playerList'),
-      sessionList: document.getElementById('sessionList'),
-      playerInput: document.getElementById('playerInput'),
-      sessionInput: document.getElementById('sessionInput'),
-      supabaseUrl: document.getElementById('supabaseUrl'),
-      supabaseAnonKey: document.getElementById('supabaseAnonKey'),
-      spaceName: document.getElementById('spaceName')
-    };
-
-    function setStatus(message, isError = false, isSyncing = false) {
-      els.status.textContent = message;
-      els.status.classList.toggle('error', isError);
-      els.status.classList.toggle('syncing', isSyncing && !isError);
-    }
-
-    function renderLists() {
-      els.playerList.innerHTML = '';
-      state.players.forEach((name, index) => {
-        const li = document.createElement('li');
-        li.textContent = `${index + 1}. ${name}`;
-        els.playerList.appendChild(li);
-      });
-
-      els.sessionList.innerHTML = '';
-      state.sessions.forEach((session) => {
-        const li = document.createElement('li');
-        li.textContent = `${session.date} :: ${session.notes || 'No notes'}`;
-        els.sessionList.appendChild(li);
-      });
-    }
-
-    function saveLocal() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (error) {
-        console.warn('Local save failed', error);
-      }
-    }
-
-    function loadLocal() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.players) && Array.isArray(parsed.sessions)) {
-          state.players = parsed.players;
-          state.sessions = parsed.sessions;
-          renderLists();
-        }
-      } catch (error) {
-        console.warn('Local load failed', error);
-      }
-    }
-
-    function updateConfigFromInputs() {
-      window.SHUTTLE_CONFIG.supabaseUrl = els.supabaseUrl.value.trim() || DEFAULT_SUPABASE_URL;
-      window.SHUTTLE_CONFIG.supabaseAnonKey = els.supabaseAnonKey.value.trim() || DEFAULT_SUPABASE_ANON_KEY;
-      window.SHUTTLE_CONFIG.space = (els.spaceName.value || DEFAULT_SPACE).trim();
-    }
-
-    function initSupabase() {
-      updateConfigFromInputs();
-      const cfg = window.SHUTTLE_CONFIG;
-      if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-        setStatus('Please enter Supabase URL and anon key.', true);
-        return null;
-      }
-
-      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-        setStatus('Supabase SDK not available.', true);
-        return null;
-      }
-
-      if (!window.supabaseClient) {
-        window.supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-      }
-
-      return window.supabaseClient;
-    }
-
-    async function cloudSaveState() {
-      const client = initSupabase();
-      if (!client) return false;
-
-      const payload = {
-        space: window.SHUTTLE_CONFIG.space,
-        payload: JSON.parse(JSON.stringify(state)),
-        updated_at: new Date().toISOString()
-      };
-
-      try {
-        setStatus(`Syncing to Supabase...`, false, true);
-        const { error } = await client
-          .from(CLOUD_TABLE)
-          .upsert(payload, { onConflict: 'space' });
-
-        if (error) throw error;
-        setStatus(`Auto-synced to Supabase for space "${window.SHUTTLE_CONFIG.space}".`);
-        saveLocal();
+  <button class="hbtn" id="hdrShare" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>Share
+  </button>
+</header>
+<main>
+  <div id="banner"></div>
+  <section id="matches"></section>
+  <section id="play" hidden></section>
+  <section id="avail" hidden></section>
+  <section id="standings" hidden></section>
+  <section id="players" hidden></section>
+  <section id="history" hidden></section>
+  <section id="share" hidden></section>
+  <section id="setup" hidden></section>
+</main>
+<nav id="nav" aria-label="Main">
+  <div class="bar8">
+  <button type="button" data-t="matches" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M12 5v14M3 12h18"/></svg>Matches</button>
+  <button type="button" data-t="play"><svg viewBox="0 0 24 24"><path d="M8 5.5l11 6.5-11 6.5z"/></svg>Play</button>
+  <button type="button" data-t="avail" id="navAvail"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 10h18M8.5 15l2.2 2.2 4.3-4.4"/></svg>Avail</button>
+  <button type="button" data-t="standings"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3"/></svg>Pairs</button>
+  <button type="button" data-t="players"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.8a3.5 3.5 0 010 6.4M18 14.2a6.5 6.5 0 013.5 5.8"/></svg>Players</button>
+  <button type="button" data-t="history"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>History</button>
+  <button type="button" data-t="setup" id="navSetup"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Setup</button>
+  <button type="button" data-t="share"><svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>Share</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ===== OPTIONAL – pre-fill your Supabase details so every device picks them up =====
+   The URL and anon/publishable key are designed to be public. The passcode is NEVER stored here –
+   you type it once per device in Setup > Cloud database. You can also leave this blank and enter everything in Setup. */
+window.SHUTTLE_CONFIG = { supabaseUrl: "", supabaseAnonKey: "", space: "badminton" };
+</script>
+<script>
+"use strict";
+/* ---------- DOM + date helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const $in = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+const isoOf = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayISO = () => isoOf(new Date());
+const toDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+const fmtDate = (iso) => toDate(iso).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtDateY = (iso) => toDate(iso).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtDay = (iso) => toDate(iso).toLocaleDateString('en-AU', { weekday: 'short' });
+const fmtDM = (iso) => toDate(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+const fmtWhen = (t) => new Date(t).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ESC_MAP[c]);
+let toastTimer = 0;
+function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => t.classList.remove('show'), 2800);
+}
+async function copyText(txt) {
+    try {
+        await navigator.clipboard.writeText(txt);
         return true;
-      } catch (error) {
-        console.error('Supabase save failed:', error);
-        setStatus('Supabase sync failed. Check the table and policy permissions.', true);
-        return false;
-      }
     }
-
-    async function cloudLoadState() {
-      const client = initSupabase();
-      if (!client) return false;
-
-      try {
-        setStatus('Loading cloud state...', false, true);
-        const { data, error } = await client
-          .from(CLOUD_TABLE)
-          .select('payload')
-          .eq('space', window.SHUTTLE_CONFIG.space)
-          .maybeSingle();
-
-        if (error && error.code !== 'PGRST116') throw error;
-
-        if (!data || !data.payload) {
-          setStatus('No cloud state was found for this space yet.');
-          return false;
+    catch (e) { /* fall through */ }
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+        ok = document.execCommand('copy');
+    }
+    catch (e) { /* ignore */ }
+    ta.remove();
+    return ok;
+}
+async function shareOrCopy(data, copyMsg) {
+    if (navigator.share) {
+        try {
+            await navigator.share(data);
+            return;
         }
-
-        const merged = data.payload;
-        if (Array.isArray(merged.players) && Array.isArray(merged.sessions)) {
-          state.players = merged.players;
-          state.sessions = merged.sessions;
-          renderLists();
-          saveLocal();
-          setStatus(`Loaded full state for space "${window.SHUTTLE_CONFIG.space}" from Supabase.`);
-          return true;
+        catch (e) {
+            if (e && e.name === 'AbortError')
+                return;
         }
-
-        setStatus('Cloud payload exists but is not a valid ShuttleMate state object.', true);
-        return false;
-      } catch (error) {
-        console.error('Supabase load failed:', error);
-        setStatus('Supabase load failed. Check the table and your permissions.', true);
-        return false;
-      }
     }
-
-    function scheduleCloudSync() {
-      updateConfigFromInputs();
-      if (!window.SHUTTLE_CONFIG.supabaseUrl || !window.SHUTTLE_CONFIG.supabaseAnonKey) return;
-      if (!window.supabaseClient) {
-        initSupabase();
-      }
-      if (!window.supabaseClient) return;
-
-      clearTimeout(cloudSyncTimer);
-      cloudSyncTimer = setTimeout(async () => {
-        await cloudSaveState();
-      }, 800);
+    const txt = [data.text, data.url].filter(Boolean).join('\n');
+    toast((await copyText(txt)) ? copyMsg : 'Could not copy – long-press to copy manually');
+}
+/* in-page dialogs (native confirm/alert are blocked in many in-app browsers) */
+function _dlg(msg, askMode) {
+    return new Promise(res => {
+        const ov = document.createElement('div');
+        ov.className = 'dlg-ov';
+        const bx = document.createElement('div');
+        bx.className = 'dlg';
+        bx.setAttribute('role', 'dialog');
+        bx.setAttribute('aria-modal', 'true');
+        const p = document.createElement('p');
+        p.textContent = msg;
+        const row = document.createElement('div');
+        row.className = 'row';
+        const onKey = (e) => { if (e.key === 'Escape')
+            done(false); };
+        const done = (v) => { document.removeEventListener('keydown', onKey); ov.remove(); res(v); };
+        const mk = (t, cls, v) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = t;
+            b.className = cls;
+            b.onclick = () => done(v);
+            return b;
+        };
+        if (askMode)
+            row.appendChild(mk('Cancel', 'cancel', false));
+        const ok = mk(askMode ? 'OK' : 'Got it', 'ok', true);
+        row.appendChild(ok);
+        bx.appendChild(p);
+        bx.appendChild(row);
+        ov.appendChild(bx);
+        document.body.appendChild(ov);
+        document.addEventListener('keydown', onKey);
+        try {
+            ok.focus();
+        }
+        catch (e) { /* ignore */ }
+    });
+}
+const ask = (msg) => _dlg(msg, true);
+const warn = (msg) => { void _dlg(msg, false); };
+/* ---------- sound & vibration ---------- */
+const FX_KEY = 'shuttle_mate_fx';
+let fxOn = true;
+try {
+    fxOn = localStorage.getItem(FX_KEY) !== 'off';
+}
+catch (e) { /* ignore */ }
+let _ac = null;
+function fx(kind) {
+    if (!fxOn)
+        return;
+    const vib = { tick: [10], start: [30, 50, 30], finish: [60, 40, 60, 40, 120] };
+    try {
+        if (navigator.vibrate)
+            navigator.vibrate(vib[kind]);
     }
+    catch (e) { /* ignore */ }
+    try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC)
+            return;
+        _ac = _ac || new AC();
+        if (_ac.state === 'suspended')
+            void _ac.resume();
+        const ctx = _ac;
+        const seq = {
+            tick: [[1100, 0, .04]],
+            start: [[660, 0, .1], [880, .12, .14]],
+            finish: [[660, 0, .1], [880, .12, .1], [1175, .24, .2]],
+        };
+        seq[kind].forEach(([f, t, d]) => {
+            const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime + t;
+            o.type = 'sine';
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(kind === 'tick' ? .05 : .09, t0 + .01);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+            o.connect(g);
+            g.connect(ctx.destination);
+            o.start(t0);
+            o.stop(t0 + d + .02);
+        });
+    }
+    catch (e) { /* ignore */ }
+}
+function setFx(on) {
+    fxOn = !!on;
+    try {
+        localStorage.setItem(FX_KEY, on ? 'on' : 'off');
+    }
+    catch (e) { /* ignore */ }
+    if (on)
+        fx('tick');
+}
+/* ---------- avatars ---------- */
+const AV_COLORS = ['#0f6cbd', '#8764b8', '#038387', '#c4314b', '#ca5010', '#107c41', '#986f0b', '#5c2e91', '#b146c2', '#0e7a8f'];
+function avColor(n) { let h = 0; for (const c of n)
+    h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV_COLORS[h % AV_COLORS.length]; }
+function initials(n) {
+    n = String(n || '?').trim();
+    const w = n.split(/\s+/);
+    if (w.length > 1)
+        return (w[0][0] + w[w.length - 1][0]).toUpperCase();
+    const m = n.match(/^([A-Za-z])[a-z]*([A-Z])/);
+    if (m)
+        return (m[1] + m[2]).toUpperCase();
+    return n.slice(0, 2).toUpperCase();
+}
 
-    document.getElementById('connectBtn').addEventListener('click', async () => {
-      updateConfigFromInputs();
-      initSupabase();
-      if (window.supabaseClient) {
-        setStatus(`Connected to Supabase for space "${window.SHUTTLE_CONFIG.space}".`);
-        await cloudLoadState();
-        await cloudSaveState();
-      }
+"use strict";
+const KEY = 'badminton_tracker_v4';
+const APP_VERSION = 'v12.1 · TypeScript + Supabase cloud sync';
+const DEFAULT_NAMES = ['Dev', 'Gagan', 'Mayank', 'Neeraj', 'Nirav', 'Sachin', 'SaketJ', 'SaketK', 'Sunil', 'Sunny', 'Tanay', 'Vijay'];
+const MAX_COURTS = 3, MIN_PLAYERS = 4, MAX_PLAYERS = 30;
+const MAX_SCORE = 21;
+let readOnly = false;
+let state = null;
+let playerMode = 'session';
+const np = () => state.players.length;
+const isActive = (i) => !state || !state.active || state.active[i] !== false;
+const activeCount = () => state.players.filter((_, i) => isActive(i)).length;
+const activeAll = (s) => s.a.every((v, i) => v || !isActive(i));
+/* ---------- state ---------- */
+function newSession(date) {
+    return { id: state.nid++, d: date, a: state.players.map((_, i) => isActive(i)), p: null, o: [], c: {}, f: false, g: false };
+}
+function freshState() {
+    state = { players: DEFAULT_NAMES.slice(), active: DEFAULT_NAMES.map(() => true), sessions: [], cur: 0, nid: 1, playSessions: [] };
+    const s = newSession(todayISO());
+    state.sessions.push(s);
+    state.cur = s.id;
+    generatePairs(s, true);
+}
+const cs = () => state.sessions.find(s => s.id === state.cur) || null;
+const sById = (id) => state.sessions.find(s => s.id === id);
+const inProgress = (s) => !!(s && s.p && s.g && !s.f);
+const pName = (s, i) => state.players[s.p[i][0]] + ' & ' + state.players[s.p[i][1]];
+const isDone = (s, k) => { const x = s.c[k]; return !!x && x[0] !== null && x[1] !== null; };
+const totalMatches = (s) => s.p ? s.p.length * (s.p.length - 1) / 2 : 0;
+const doneCount = (s) => Object.keys(s.c).filter(k => isDone(s, k)).length;
+const availIdx = (s) => s.a.map((v, i) => v ? i : -1).filter(i => i >= 0);
+const lockedMsg = (s, what) => s.f
+    ? 'This session is finished, so ' + what + ' can’t be changed.\n\nTap “Reopen” if you really need to edit it.'
+    : 'This session is in progress, so ' + what + ' are locked.\n\nPlayers are already on court – you can’t re-pair mid-session. Finish the session first' + (doneCount(s) === 0 ? ', or use “Undo start” if you started by mistake.' : '.');
+function loadLocal() {
+    let raw = null;
+    try {
+        raw = localStorage.getItem(KEY);
+    }
+    catch (e) { /* ignore */ }
+    if (!raw)
+        return null;
+    let st = null;
+    try {
+        st = normalizeState(JSON.parse(raw));
+    }
+    catch (e) { /* ignore */ }
+    if (!st) {
+        try {
+            localStorage.setItem(KEY + '_backup', raw);
+        }
+        catch (e) { /* ignore */ }
+    }
+    return st;
+}
+/* Validates & repairs any state (saved, shared or restored from a backup). */
+function normalizeState(raw) {
+    if (!raw || typeof raw !== 'object' || !Array.isArray(raw.players) || !Array.isArray(raw.sessions))
+        return null;
+    const players = raw.players.map((n, i) => String(n == null ? '' : n).trim().slice(0, 40) || ('Player ' + (i + 1)));
+    const n = players.length;
+    if (n < MIN_PLAYERS || n > MAX_PLAYERS)
+        return null;
+    const active = players.map((_, i) => !(Array.isArray(raw.active) && raw.active[i] === false));
+    const okIdx = (v) => Number.isInteger(v) && v >= 0 && v < n;
+    const used = new Set();
+    const sessions = [];
+    for (const x of raw.sessions) {
+        if (!x || typeof x !== 'object' || typeof x.d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x.d))
+            continue;
+        let id = Number.isInteger(x.id) && x.id > 0 ? x.id : 0;
+        if (!id || used.has(id)) {
+            id = Math.max(0, ...used) + 1;
+        }
+        used.add(id);
+        const a = players.map((_, i) => Array.isArray(x.a) ? x.a[i] === true : active[i]);
+        let p = null, o = [];
+        const c = {};
+        if (Array.isArray(x.p) && x.p.length >= 2) {
+            const seen = new Set();
+            let good = true;
+            for (const pr of x.p) {
+                if (!Array.isArray(pr) || pr.length !== 2 || !okIdx(pr[0]) || !okIdx(pr[1]) || pr[0] === pr[1] || seen.has(pr[0]) || seen.has(pr[1])) {
+                    good = false;
+                    break;
+                }
+                seen.add(pr[0]);
+                seen.add(pr[1]);
+            }
+            if (good) {
+                p = x.p.map(pr => [pr[0], pr[1]]);
+                o = (Array.isArray(x.o) ? x.o : []).filter((v, j, arr) => okIdx(v) && !seen.has(v) && arr.indexOf(v) === j);
+                const rounds = buildSchedule(p.length);
+                if (x.c && typeof x.c === 'object')
+                    for (const k of Object.keys(x.c)) {
+                        const m = /^(\d+)-(\d+)$/.exec(k), v = x.c[k];
+                        if (!m || !rounds[+m[1]] || !rounds[+m[1]].ms[+m[2]])
+                            continue;
+                        if (!Array.isArray(v) || v.length !== 2)
+                            continue;
+                        const sc = v.map((t) => t === null ? null : (Number.isInteger(t) && t >= 0 && t <= 99 ? t : undefined));
+                        if (sc.includes(undefined))
+                            continue;
+                        if (sc[0] === null && sc[1] === null)
+                            continue;
+                        c[k] = sc;
+                    }
+            }
+        }
+        sessions.push({ id, d: x.d, a, p, o, c, f: !!x.f, g: !!p && (!!x.g || !!x.f || Object.keys(c).length > 0) });
+    }
+    const ids = sessions.map(z => z.id);
+    const cur = ids.includes(raw.cur) ? raw.cur : (ids.length ? ids[ids.length - 1] : 0);
+    const playSessions = Array.isArray(raw.playSessions) ? raw.playSessions : [];
+    return { players, active, sessions, cur, nid: Math.max(0, ...ids) + 1, playSessions };
+}
+function save() { if (!readOnly) {
+    try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+    }
+    catch (e) { /* ignore */ }
+    cloudMarkDirty();
+} }
+/* ---------- schedule (round robin, handles odd pair counts with a rest) ---------- */
+function buildSchedule(k) {
+    if (k < 2)
+        return [];
+    const n = k % 2 ? k + 1 : k;
+    let t = [...Array(n).keys()];
+    const rounds = [];
+    for (let r = 0; r < n - 1; r++) {
+        const ms = [];
+        for (let i = 0; i < n / 2; i++) {
+            const a = t[i], b = t[n - 1 - i];
+            if (a < k && b < k)
+                ms.push({ a, b, court: 0 });
+        }
+        for (let q = 0; q < r % Math.max(ms.length, 1); q++)
+            ms.push(ms.shift());
+        for (let c = 0; c < ms.length; c += MAX_COURTS) {
+            const chunk = ms.slice(c, c + MAX_COURTS);
+            chunk.forEach((m, i) => { m.court = i + 1; });
+            const playing = new Set(chunk.flatMap(m => [m.a, m.b]));
+            rounds.push({ ms: chunk, rest: [...Array(k).keys()].filter(x => !playing.has(x)) });
+        }
+        t = [t[0], t[n - 1], ...t.slice(1, n - 1)];
+    }
+    return rounds;
+}
+const scheduleOf = (s) => s && s.p ? buildSchedule(s.p.length) : [];
+/* ---------- random pairing ---------- */
+function shuffle(a) {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+function generatePairs(s, silent) {
+    const avail = availIdx(s).filter(isActive);
+    if (avail.length < 4) {
+        if (!silent)
+            toast('Need at least 4 available players');
+        return false;
+    }
+    const others = state.sessions.filter(x => x.id !== s.id);
+    const sit = Array(np()).fill(0);
+    others.forEach(x => (x.o || []).forEach(i => sit[i]++));
+    const pc = {};
+    others.forEach(x => (x.p || []).forEach(([a, b]) => { const k = Math.min(a, b) + '-' + Math.max(a, b); pc[k] = (pc[k] || 0) + 1; }));
+    let pool = avail.slice(), out = [];
+    if (pool.length % 2) {
+        const m = Math.min(...pool.map(i => sit[i])), c = pool.filter(i => sit[i] === m);
+        const x = c[Math.floor(Math.random() * c.length)];
+        out = [x];
+        pool = pool.filter(i => i !== x);
+    }
+    let best = [], bc = Infinity;
+    for (let t = 0; t < 400 && bc > 0; t++) {
+        const sh = shuffle(pool), pairs = [];
+        let cost = 0;
+        for (let i = 0; i < sh.length; i += 2) {
+            pairs.push([sh[i], sh[i + 1]]);
+            cost += pc[Math.min(sh[i], sh[i + 1]) + '-' + Math.max(sh[i], sh[i + 1])] || 0;
+        }
+        if (cost < bc) {
+            bc = cost;
+            best = pairs;
+        }
+    }
+    s.p = best;
+    s.o = out;
+    s.c = {};
+    s.repeat = bc;
+    return true;
+}
+/* ---------- manual pair editor ---------- */
+let PE = null;
+function partnerCount(s, a, b) {
+    let n = 0;
+    state.sessions.forEach(x => { if (x.id === s.id || !x.p)
+        return; x.p.forEach(([u, v]) => { if ((u === a && v === b) || (u === b && v === a))
+        n++; }); });
+    return n;
+}
+function openPairEditor() {
+    const s = cs();
+    if (!s || readOnly)
+        return;
+    if (!s.p) {
+        toast('Make pairs first (Avail tab)');
+        return;
+    }
+    if (s.g || s.f) {
+        warn(lockedMsg(s, 'the pairs') + '\n\nTo edit pairs for a session already in progress, tap “Undo start” first (only possible before any score is entered).');
+        return;
+    }
+    PE = { id: s.id, arr: [...s.p.flat(), ...s.o] };
+    renderPairEditor();
+}
+function renderPairEditor() {
+    if (!PE)
+        return;
+    const s = sById(PE.id);
+    if (!s || !s.p)
+        return;
+    const np2 = s.p.length, arr = PE.arr;
+    const opts = arr.slice().sort((a, b) => state.players[a].localeCompare(state.players[b]));
+    const sel = (j) => `<select onchange="peSet(${j},+this.value)" aria-label="Slot ${j + 1}">${opts.map(i => `<option value="${i}" ${i === arr[j] ? 'selected' : ''}>${esc(state.players[i])}</option>`).join('')}</select>`;
+    let rep = 0, rows = '';
+    for (let k = 0; k < np2; k++) {
+        const a = arr[2 * k], b = arr[2 * k + 1], c = partnerCount(s, a, b);
+        if (c)
+            rep++;
+        rows += `<div class="pe-row ${c ? 'warn' : ''}"><div class="pl"><span>PAIR ${k + 1}</span>${c ? `<span class="rw">⚠ partnered ${c}× before</span>` : '<span>✓ new partnership</span>'}</div><div class="pe-sel">${sel(2 * k)}${sel(2 * k + 1)}</div></div>`;
+    }
+    if (arr.length > 2 * np2)
+        rows += `<div class="pe-row out"><div class="pl"><span>🪑 SITTING OUT</span></div><div class="pe-sel">${sel(2 * np2)}</div></div>`;
+    let ov = document.getElementById('peOv');
+    if (!ov) {
+        ov = document.createElement('div');
+        ov.id = 'peOv';
+        ov.className = 'pe-ov';
+        document.body.appendChild(ov);
+    }
+    const keep = ov.querySelector('.pe-b');
+    const top = keep ? keep.scrollTop : 0;
+    ov.innerHTML = `<div class="pe-box" role="dialog" aria-label="Edit pairs"><div class="pe-h"><h2>✏️ Edit pairs · ${esc(fmtDate(s.d))}</h2>
+    <p class="muted" style="margin:0">Pick a player in any slot – if they’re already in another slot, the two players swap places.${rep ? ` <b style="color:var(--amber-ink)">${rep} repeat partnership${rep > 1 ? 's' : ''}.</b>` : ''}</p></div>
+    <div class="pe-b">${rows}</div>
+    <div class="pe-f"><button class="btn sec" onclick="peClose()">Cancel</button><button class="btn" onclick="peSave()">Save pairs</button></div></div>`;
+    const nb = ov.querySelector('.pe-b');
+    if (nb)
+        nb.scrollTop = top;
+}
+function peSet(j, v) {
+    if (!PE || !Number.isInteger(v))
+        return;
+    const i = PE.arr.indexOf(v);
+    if (i < 0 || i === j) {
+        renderPairEditor();
+        return;
+    }
+    [PE.arr[i], PE.arr[j]] = [PE.arr[j], PE.arr[i]];
+    renderPairEditor();
+}
+function peClose() { PE = null; const o = document.getElementById('peOv'); if (o)
+    o.remove(); }
+async function peSave() {
+    if (!PE)
+        return;
+    const s = sById(PE.id);
+    if (!s || !s.p || s.g || s.f || readOnly) {
+        peClose();
+        return;
+    }
+    const arr = PE.arr, np2 = s.p.length;
+    const npairs = [];
+    for (let k = 0; k < np2; k++)
+        npairs.push([arr[2 * k], arr[2 * k + 1]]);
+    const out = arr.slice(2 * np2);
+    const same = JSON.stringify(npairs) === JSON.stringify(s.p) && JSON.stringify(out) === JSON.stringify(s.o);
+    if (same) {
+        peClose();
+        toast('No changes to the pairs');
+        return;
+    }
+    if (new Set(arr).size !== arr.length) {
+        warn('Each player can only be in one slot.');
+        return;
+    }
+    if (doneCount(s) && !await ask('Changing the pairs clears the scores for ' + fmtDate(s.d) + '. Continue?'))
+        return;
+    s.p = npairs;
+    s.o = out;
+    s.c = {};
+    s.repeat = npairs.filter(([a, b]) => partnerCount(s, a, b) > 0).length;
+    peClose();
+    save();
+    renderAll();
+    toast('Pairs updated ✏️' + (s.repeat ? ` (${s.repeat} repeat partner${s.repeat > 1 ? 's' : ''})` : ' – no repeat partners'));
+}
+async function repairCurrent() {
+    const s = cs();
+    if (!s || readOnly)
+        return;
+    if (s.g || s.f) {
+        warn(lockedMsg(s, 'the pairs'));
+        return;
+    }
+    if (doneCount(s) && !await ask('Re-pairing will clear the scores for this session. Continue?'))
+        return;
+    if (generatePairs(s)) {
+        save();
+        renderAll();
+        toast('New random pairs' + (s.repeat ? ` (${s.repeat} repeat partner${s.repeat > 1 ? 's' : ''} unavoidable)` : ' – no repeat partners'));
+    }
+}
+/* ---------- sessions & availability ---------- */
+function addSession() {
+    if (readOnly)
+        return;
+    const v = ($in('newDate') && $in('newDate').value) || todayISO();
+    if (state.sessions.some(s => s.d === v)) {
+        toast('That date already exists');
+        return;
+    }
+    const s = newSession(v);
+    state.sessions.push(s);
+    state.sessions.sort((a, b) => a.d < b.d ? -1 : 1);
+    state.cur = s.id;
+    save();
+    renderAll();
+    toast(fmtDate(v) + ' added – untick anyone who can’t play');
+}
+async function delSession(id) {
+    const s = sById(id);
+    if (!s)
+        return;
+    if ((s.p || doneCount(s)) && !await ask('Delete ' + fmtDate(s.d) + (inProgress(s) ? ' – this session is IN PROGRESS –' : '') + ' and its scores?\n\n(You can bring it back from Setup › Restore points.)'))
+        return;
+    if (s.p || doneCount(s))
+        snap('before deleting ' + fmtDate(s.d));
+    state.sessions = state.sessions.filter(x => x.id !== id);
+    if (state.cur === id)
+        state.cur = state.sessions.length ? state.sessions[state.sessions.length - 1].id : 0;
+    save();
+    renderAll();
+}
+async function toggleAvail(id, pi) {
+    const s = sById(id);
+    if (!s || readOnly)
+        return;
+    if (s.g || s.f) {
+        warn(lockedMsg(s, 'availability and pairs'));
+        renderAvail();
+        return;
+    }
+    if (s.p && doneCount(s) && !await ask('Scores are already recorded for ' + fmtDate(s.d) + '. Changing availability resets pairs and scores for this date. Continue?')) {
+        renderAvail();
+        return;
+    }
+    s.a[pi] = !s.a[pi];
+    if (s.p) {
+        s.p = null;
+        s.o = [];
+        s.c = {};
+    }
+    save();
+    renderAvail();
+    renderMatches();
+    renderStandings();
+    renderPlayers();
+}
+async function toggleAll(id) {
+    const s = sById(id);
+    if (!s || readOnly)
+        return;
+    if (s.g || s.f) {
+        warn(lockedMsg(s, 'availability and pairs'));
+        return;
+    }
+    if (s.p && doneCount(s) && !await ask('This resets pairs and scores for ' + fmtDate(s.d) + '. Continue?'))
+        return;
+    const act = s.a.map((_, i) => i).filter(isActive), all = act.every(i => s.a[i]);
+    act.forEach(i => { s.a[i] = !all; });
+    if (s.p) {
+        s.p = null;
+        s.o = [];
+        s.c = {};
+    }
+    save();
+    renderAvail();
+    renderMatches();
+    renderStandings();
+    renderPlayers();
+}
+async function pairFor(id) {
+    const s = sById(id);
+    if (!s || readOnly)
+        return;
+    if (s.g || s.f) {
+        warn(lockedMsg(s, 'the pairs'));
+        return;
+    }
+    if (doneCount(s) && !await ask('This clears the scores for ' + fmtDate(s.d) + '. Continue?'))
+        return;
+    if (generatePairs(s)) {
+        state.cur = id;
+        save();
+        renderAll();
+        show('matches');
+        toast('Random pairs ready for ' + fmtDate(s.d) + (s.o.length ? ' · ' + state.players[s.o[0]] + ' sits out' : ''));
+    }
+}
+function nextDate(iso) {
+    const d = toDate(iso);
+    let n = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7);
+    while (state.sessions.some(x => x.d === isoOf(n)))
+        n = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 7);
+    return isoOf(n);
+}
+function startNext(from) {
+    const later = state.sessions.filter(x => !x.f && x.d > from.d).sort((a, b) => a.d < b.d ? -1 : 1)[0];
+    if (later) {
+        state.cur = later.id;
+        return later;
+    }
+    const n = newSession(nextDate(from.d));
+    state.sessions.push(n);
+    state.sessions.sort((a, b) => a.d < b.d ? -1 : 1);
+    state.cur = n.id;
+    return n;
+}
+async function startSession() {
+    const s = cs();
+    if (!s || readOnly)
+        return;
+    if (!s.p) {
+        toast('Make pairs first (Avail tab)');
+        return;
+    }
+    if (s.g) {
+        toast('Session already started');
+        return;
+    }
+    if (!await ask('Start the session for ' + fmtDate(s.d) + '?\n\nOnce started, the pairs and availability are locked – you can’t re-pair. Scores can then be entered.'))
+        return;
+    s.g = true;
+    save();
+    renderAll();
+    fx('start');
+    toast('Session started 🏸 – pairs are locked, enter scores as matches finish');
+}
+async function undoStart() {
+    const s = cs();
+    if (!s || readOnly || !s.g || s.f)
+        return;
+    if (doneCount(s) > 0) {
+        warn('Scores have already been entered, so the start can’t be undone.\n\nFinish the session instead.');
+        return;
+    }
+    if (!await ask('Undo start? Pairs will be unlocked so you can re-pair.'))
+        return;
+    s.g = false;
+    save();
+    renderAll();
+    toast('Start undone – pairs unlocked');
+}
+async function finishSession() {
+    const s = cs();
+    if (!s || readOnly)
+        return;
+    if (!s.p) {
+        toast('Make pairs and play some matches first');
+        return;
+    }
+    if (!s.g) {
+        warn('Start the session first.\n\nTap “Start session” on the Matches tab, play, then finish.');
+        return;
+    }
+    const left = totalMatches(s) - doneCount(s);
+    if (doneCount(s) === 0 && !await ask('No scores have been entered for this session. Finish it anyway?'))
+        return;
+    if (left > 0 && doneCount(s) > 0 && !await ask(left + ' match' + (left === 1 ? ' has' : 'es have') + ' no score yet. Finish this session anyway?\n\nScores will be locked (you can reopen it later).'))
+        return;
+    s.f = true;
+    const n = startNext(s);
+    save();
+    renderAll();
+    show('avail');
+    fx('finish');
+    toast('Session finished ✅ saved to History · now set availability for ' + fmtDate(n.d));
+}
+function reopenSession(id) {
+    const s = sById(id);
+    if (!s || readOnly)
+        return;
+    s.f = false;
+    state.cur = id;
+    save();
+    renderAll();
+    toast(fmtDate(s.d) + ' reopened');
+}
+function goNext() {
+    const s = cs();
+    if (!s)
+        return;
+    startNext(s);
+    save();
+    renderAll();
+    show('avail');
+    toast('Set availability for ' + fmtDate(cs().d));
+}
+function selectSession(v) { state.cur = +v; save(); renderAll(); }
+/* ---------- scoring ---------- */
+function setScore(r, m, side, val) {
+    const s = cs();
+    if (readOnly || !s || s.f)
+        return;
+    if (!s.g) {
+        warn('Start the session first, then enter scores.');
+        renderMatches();
+        return;
+    }
+    const k = r + '-' + m, cur = s.c[k] || [null, null];
+    if (val !== '' && val !== null) {
+        const n = parseInt(String(val), 10);
+        if (!Number.isInteger(n) || n < 0) {
+            toast('Enter a score between 0 and ' + MAX_SCORE);
+            renderMatches();
+            return;
+        }
+        if (n > MAX_SCORE) {
+            warn('Maximum score is ' + MAX_SCORE + '.\n\nPlease enter a score from 0 to ' + MAX_SCORE + '.');
+            renderMatches();
+            return;
+        }
+    }
+    cur[side] = (val === '' || val === null) ? null : parseInt(String(val), 10);
+    if (cur[side] !== null)
+        fx('tick');
+    if (cur[0] === null && cur[1] === null)
+        delete s.c[k];
+    else
+        s.c[k] = cur;
+    save();
+    renderMatches();
+    renderStandings();
+    renderPlayers();
+}
+function bump(r, m, side, d) {
+    const s = cs();
+    if (!s)
+        return false;
+    const cur = (s.c[r + '-' + m] || [null, null])[side] ?? 0;
+    if (d > 0 && cur >= MAX_SCORE) {
+        toast('Maximum score is ' + MAX_SCORE);
+        return false;
+    }
+    const nx = Math.max(0, cur + d);
+    setScore(r, m, side, nx);
+    return nx > 0 && nx < MAX_SCORE;
+}
+
+"use strict";
+/* ---------- stats ---------- */
+function pairStats(s) {
+    if (!s || !s.p)
+        return [];
+    const st = s.p.map((_, i) => ({ id: i, p: 0, w: 0, l: 0, pf: 0, pa: 0 }));
+    scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+        const k = r + '-' + i;
+        if (!isDone(s, k))
+            return;
+        const [sa, sb] = s.c[k], A = st[m.a], B = st[m.b];
+        A.p++;
+        B.p++;
+        A.pf += sa;
+        A.pa += sb;
+        B.pf += sb;
+        B.pa += sa;
+        if (sa > sb) {
+            A.w++;
+            B.l++;
+        }
+        else if (sb > sa) {
+            B.w++;
+            A.l++;
+        }
+    }));
+    return st.sort((x, y) => (y.w - x.w) || ((y.pf - y.pa) - (x.pf - x.pa)) || (y.pf - x.pf));
+}
+function playerStats(list, plays) {
+    const ps = state.players.map((n, i) => ({ i, n, s: 0, p: 0, w: 0, l: 0, pf: 0, pa: 0 }));
+    list.forEach(s => {
+        if (!s.p)
+            return;
+        const pairs = s.p;
+        const played = new Set();
+        pairStats(s).forEach(st => pairs[st.id].forEach(pi => {
+            const q = ps[pi];
+            q.p += st.p;
+            q.w += st.w;
+            q.l += st.l;
+            q.pf += st.pf;
+            q.pa += st.pa;
+            if (st.p)
+                played.add(pi);
+        }));
+        played.forEach(pi => ps[pi].s++);
     });
-
-    document.getElementById('saveBtn').addEventListener('click', async () => {
-      await cloudSaveState();
+    const seenPlay = new Set();
+    (plays || []).forEach(({ ps: pses, g }) => g.players.forEach((pid, i) => {
+        const q = ps[pid];
+        if (!q)
+            return;
+        const side = i < 2 ? 0 : 1, f = g.score[side], a = g.score[1 - side];
+        q.p++;
+        q.pf += f;
+        q.pa += a;
+        if (f > a)
+            q.w++;
+        else if (a > f)
+            q.l++;
+        const key = pid + '|' + pses.id;
+        if (!seenPlay.has(key)) {
+            seenPlay.add(key);
+            q.s++;
+        }
+    }));
+    return ps.sort((x, y) => (y.w - x.w) || ((y.pf - y.pa) - (x.pf - x.pa)) || (y.pf - x.pf));
+}
+/* ---------- restore points ---------- */
+const SNAP_KEY = KEY + '_snaps', MAX_SNAPS = 8;
+function getSnaps() {
+    try {
+        const a = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]');
+        return Array.isArray(a) ? a : [];
+    }
+    catch (e) {
+        return [];
+    }
+}
+function snap(reason, obj) {
+    if (readOnly)
+        return;
+    const src = obj || state;
+    if (!src || !src.sessions || !src.sessions.length)
+        return;
+    try {
+        const a = getSnaps();
+        a.unshift({ t: Date.now(), r: reason, j: JSON.stringify(src) });
+        localStorage.setItem(SNAP_KEY, JSON.stringify(a.slice(0, MAX_SNAPS)));
+    }
+    catch (e) { /* ignore */ }
+    renderSnaps();
+}
+function describeState(st) {
+    const fin = st.sessions.filter(x => x.f).length, m = st.sessions.reduce((t, x) => t + doneCount(x), 0);
+    return '• ' + st.players.length + ' players\n• ' + st.sessions.length + ' session' + (st.sessions.length === 1 ? '' : 's') + ' (' + fin + ' finished)\n• ' + m + ' match' + (m === 1 ? '' : 'es') + ' with scores';
+}
+function renderSnaps() {
+    const el = document.getElementById('snapList');
+    if (!el)
+        return;
+    const a = getSnaps();
+    el.innerHTML = a.length ? a.map((p, i) => `<div class="snap"><div><b>${esc(fmtWhen(p.t))}</b><br><span class="muted">${esc(p.r)}</span></div>
+    <button class="btn sec" onclick="restorePoint(${i})">Go back</button></div>`).join('') : '<p class="muted" style="margin:8px 0 0">None yet. A restore point is saved automatically before you restore a backup, delete a session, remove a player or clear everything.</p>';
+}
+async function restorePoint(i) {
+    if (readOnly)
+        return;
+    const p = getSnaps()[i];
+    if (!p)
+        return;
+    let st = null;
+    try {
+        st = normalizeState(JSON.parse(p.j));
+    }
+    catch (e) { /* ignore */ }
+    if (!st) {
+        warn('That restore point is damaged and can’t be used.');
+        return;
+    }
+    if (!await ask('Go back to your data as it was on ' + fmtWhen(p.t) + '?\n(' + p.r + ')\n\n' + describeState(st) + '\n\nYour current data is saved as a new restore point first.'))
+        return;
+    snap('before going back to ' + fmtWhen(p.t));
+    state = st;
+    save();
+    renderAll();
+    toast('Restored – ' + fmtWhen(p.t));
+}
+/* ---------- pair reports ---------- */
+const avg = (n, d) => d ? (n / d).toFixed(1) : '–';
+const pKey = (ids) => ids.slice().sort((a, b) => a - b).join('-');
+function playGamesDone() {
+    const out = [];
+    playList().forEach(ps => (ps.games || []).forEach(g => { if (g.ended && g.score && g.score[0] !== null && g.score[1] !== null)
+        out.push({ ps, g }); }));
+    return out;
+}
+const playGamesOn = (date) => playGamesDone().filter(x => x.ps.date === date);
+function pairMatchLog(s, id) {
+    const out = [];
+    scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+        const k = r + '-' + i;
+        if (!isDone(s, k) || (m.a !== id && m.b !== id))
+            return;
+        const [sa, sb] = s.c[k], mine = m.a === id ? sa : sb, theirs = m.a === id ? sb : sa, opp = m.a === id ? m.b : m.a;
+        out.push({ r: r + 1, court: m.court, opp: pName(s, opp), f: mine, a: theirs });
+    }));
+    return out;
+}
+function pairRowsFor(s) {
+    const map = new Map();
+    const get = (ids) => {
+        const k = pKey(ids);
+        let o = map.get(k);
+        if (!o) {
+            o = { ids: ids.slice().sort((a, b) => a - b), p: 0, w: 0, l: 0, pf: 0, pa: 0, log: [], play: 0 };
+            map.set(k, o);
+        }
+        return o;
+    };
+    if (s && s.p) {
+        const pairs = s.p;
+        pairStats(s).forEach(x => {
+            const o = get(pairs[x.id]);
+            o.p += x.p;
+            o.w += x.w;
+            o.l += x.l;
+            o.pf += x.pf;
+            o.pa += x.pa;
+            pairMatchLog(s, x.id).forEach(m => o.log.push({ r: m.r, opp: m.opp, f: m.f, a: m.a }));
+        });
+    }
+    if (s)
+        playGamesOn(s.d).forEach(({ ps, g }) => {
+            const n = ps.games.indexOf(g) + 1;
+            const sides = [
+                [g.players.slice(0, 2), g.score[0], g.score[1], 1],
+                [g.players.slice(2, 4), g.score[1], g.score[0], 0],
+            ];
+            sides.forEach(([pr, f, a, oth]) => {
+                const o = get(pr);
+                o.p++;
+                o.pf += f;
+                o.pa += a;
+                o.play++;
+                if (f > a)
+                    o.w++;
+                else if (a > f)
+                    o.l++;
+                o.log.push({ r: 'G' + n, opp: playPairName(g, oth), f, a });
+            });
+        });
+    return [...map.values()].sort((x, y) => (y.w - x.w) || ((y.pf - y.pa) - (x.pf - x.pa)) || (y.pf - x.pf));
+}
+function pairReport() {
+    const map = new Map();
+    state.sessions.forEach(s => {
+        if (!s.p)
+            return;
+        const pairs = s.p;
+        pairStats(s).forEach(x => {
+            if (!x.p)
+                return;
+            const ids = pairs[x.id].slice().sort((a, b) => a - b), k = ids.join('-');
+            let o = map.get(k);
+            if (!o) {
+                o = { ids, s: 0, p: 0, w: 0, l: 0, pf: 0, pa: 0 };
+                map.set(k, o);
+            }
+            o.s++;
+            o.p += x.p;
+            o.w += x.w;
+            o.l += x.l;
+            o.pf += x.pf;
+            o.pa += x.pa;
+        });
     });
-
-    document.getElementById('loadBtn').addEventListener('click', async () => {
-      await cloudLoadState();
+    playGamesDone().forEach(({ ps, g }) => {
+        const sides = [[g.players.slice(0, 2), g.score[0], g.score[1]], [g.players.slice(2, 4), g.score[1], g.score[0]]];
+        sides.forEach(([pr, f, a]) => {
+            const ids = pr.slice().sort((x, y) => x - y), k = ids.join('-');
+            let o = map.get(k);
+            if (!o) {
+                o = { ids, s: 0, p: 0, w: 0, l: 0, pf: 0, pa: 0 };
+                map.set(k, o);
+            }
+            if (!o._ps)
+                o._ps = new Set();
+            if (!o._ps.has(ps.id)) {
+                o._ps.add(ps.id);
+                o.s++;
+            }
+            o.p++;
+            o.pf += f;
+            o.pa += a;
+            if (f > a)
+                o.w++;
+            else if (a > f)
+                o.l++;
+        });
     });
-
-    document.getElementById('addPlayerBtn').addEventListener('click', () => {
-      const name = document.getElementById('playerInput').value.trim();
-      if (!name) return;
-      state.players.push(name);
-      document.getElementById('playerInput').value = '';
-      saveLocal();
-      renderLists();
-      scheduleCloudSync();
+    return [...map.values()].sort((a, b) => (b.w - a.w) || ((b.pf - b.pa) - (a.pf - a.pa)) || (b.pf - a.pf) || (a.p - b.p));
+}
+function playPlayerStats(pid) {
+    const o = { p: 0, w: 0, l: 0, pf: 0, pa: 0 };
+    playGamesDone().forEach(({ g }) => {
+        const i = g.players.indexOf(pid);
+        if (i < 0)
+            return;
+        const side = i < 2 ? 0 : 1, f = g.score[side], a = g.score[1 - side];
+        o.p++;
+        o.pf += f;
+        o.pa += a;
+        if (f > a)
+            o.w++;
+        else if (a > f)
+            o.l++;
     });
+    return o;
+}
+/* ---------- play now ---------- */
+const playList = () => { if (!Array.isArray(state.playSessions))
+    state.playSessions = []; return state.playSessions; };
+const currentPlay = () => playList().find(x => !x.ended) || null;
+const playBusy = (ps) => new Set((ps ? ps.games : []).filter(g => !g.ended).flatMap(g => g.players));
+function playSessionStart() {
+    if (readOnly)
+        return;
+    if (currentPlay()) {
+        toast('A play session is already open');
+        renderPlay();
+        return;
+    }
+    const d = ($in('playDate') && $in('playDate').value) || todayISO();
+    playList().push({ id: Date.now(), date: d, started: Date.now(), ended: null, games: [] });
+    save();
+    renderPlay();
+    toast('Play session started for ' + fmtDate(d));
+}
+function playSessionEnd() {
+    const ps = currentPlay();
+    if (!ps || readOnly)
+        return;
+    if (ps.games.some(g => !g.ended)) {
+        warn('End all active games first.');
+        return;
+    }
+    ps.ended = Date.now();
+    save();
+    renderPlay();
+    toast('Play session ended');
+}
+function playOptions(selected) {
+    const ps = currentPlay(), busy = playBusy(ps);
+    return state.players.map((n, i) => ({ i, n })).filter(x => isActive(x.i) && (!busy.has(x.i) || x.i === selected))
+        .map(x => `<option value="${x.i}" ${x.i === selected ? 'selected' : ''}>${esc(x.n)}</option>`).join('');
+}
+function startPlayGame() {
+    const ps = currentPlay();
+    if (!ps || readOnly)
+        return;
+    const ids = ['pg0', 'pg1', 'pg2', 'pg3'].map(id => +(($in(id) || { value: '' }).value));
+    if (ids.some(x => !Number.isInteger(x)) || new Set(ids).size !== 4) {
+        toast('Select 4 different players');
+        return;
+    }
+    const busy = playBusy(ps);
+    if (ids.some(x => busy.has(x))) {
+        toast('One of these players is already playing');
+        renderPlay();
+        return;
+    }
+    const liveGames = ps.games.filter(g => !g.ended);
+    if (liveGames.length >= MAX_COURTS) {
+        toast('All ' + MAX_COURTS + ' courts are already in use');
+        return;
+    }
+    const usedCourts = new Set(liveGames.map(g => g.court)), court = [1, 2, 3].find(c => !usedCourts.has(c));
+    ps.games.push({ id: Date.now(), court, players: ids, score: [null, null], started: Date.now(), ended: null });
+    save();
+    renderPlay();
+    fx('start');
+    toast('Game started on Court ' + court);
+}
+function setPlayScore(gid, side, val) {
+    const ps = currentPlay() || playList().find(x => x.games && x.games.some(g => g.id === gid));
+    if (!ps || readOnly)
+        return;
+    const g = ps.games.find(x => x.id === gid);
+    if (!g || g.ended)
+        return;
+    const n = val === '' ? null : parseInt(val, 10);
+    if (n !== null && (!Number.isInteger(n) || n < 0 || n > MAX_SCORE)) {
+        toast('Score must be 0 to ' + MAX_SCORE);
+        renderPlay();
+        return;
+    }
+    g.score[side] = n;
+    save();
+    renderPlay();
+}
+async function endPlayGame(gid) {
+    const ps = currentPlay();
+    if (!ps || readOnly)
+        return;
+    const g = ps.games.find(x => x.id === gid);
+    if (!g || g.ended)
+        return;
+    if (g.score[0] === null || g.score[1] === null) {
+        toast('Enter both scores before ending the game');
+        return;
+    }
+    if (g.score[0] === g.score[1]) {
+        toast('Scores cannot be tied');
+        return;
+    }
+    g.ended = Date.now();
+    save();
+    renderPlay();
+    fx('finish');
+    toast('Game ended – players are available again');
+}
+function playPairName(g, side) { const a = side ? 2 : 0; return state.players[g.players[a]] + ' & ' + state.players[g.players[a + 1]]; }
+async function delPlayGame(psId, gid) {
+    const ps = playList().find(x => x.id === psId);
+    if (!ps || readOnly)
+        return;
+    if (!await ask('Delete this play game and its score?'))
+        return;
+    ps.games = ps.games.filter(g => g.id !== gid);
+    if (!ps.games.length && ps.ended)
+        state.playSessions = playList().filter(x => x.id !== psId);
+    save();
+    renderHistory();
+    renderPlay();
+}
+async function delPlaySession(psId) {
+    const ps = playList().find(x => x.id === psId);
+    if (!ps || readOnly)
+        return;
+    if (!ps.ended) {
+        toast('End the play session first');
+        return;
+    }
+    if (!await ask('Delete the play session on ' + fmtDate(ps.date) + ' and all its games?'))
+        return;
+    state.playSessions = playList().filter(x => x.id !== psId);
+    save();
+    renderHistory();
+    renderPlay();
+}
 
-    document.getElementById('addSessionBtn').addEventListener('click', () => {
-      const date = document.getElementById('sessionInput').value;
-      if (!date) return;
-      state.sessions.push({ id: Date.now(), date, notes: 'New session' });
-      document.getElementById('sessionInput').value = '';
-      saveLocal();
-      renderLists();
-      scheduleCloudSync();
+"use strict";
+/* ---------- view helpers ---------- */
+const avatar = (i) => {
+    const n = state.players[i] || '?';
+    return `<span class="pav" style="background:${avColor(n)}" title="${esc(n)}">${esc(initials(n))}</span>`;
+};
+const pairAv = (s, i) => {
+    const pr = s.p[i];
+    return `<span class="pavs">${avatar(pr[0])}${avatar(pr[1])}</span>`;
+};
+const pairNm = (o) => o.ids.map(i => esc(state.players[i])).join(' &amp; ');
+const pairAvIds = (o) => `<span class="pavs">${o.ids.map(avatar).join('')}</span>`;
+const signed = (n) => (n > 0 ? '+' : '') + n;
+function sessionOptions() {
+    return state.sessions.map(s => {
+        const lab = (s.f ? '✅ ' : inProgress(s) ? '▶ ' : '') + fmtDate(s.d) + (s.f ? ' · finished' : inProgress(s) ? ` · in progress ${doneCount(s)}/${totalMatches(s)}` : s.p ? ' · paired, not started' : ' · not paired');
+        return `<option value="${s.id}" ${s.id === state.cur ? 'selected' : ''}>${esc(lab)}</option>`;
+    }).join('');
+}
+function sessionBar(withRepair) {
+    if (!state.sessions.length)
+        return '';
+    const s = cs();
+    return `<div class="card"><div class="sbar"><select onchange="selectSession(this.value)" aria-label="Session">${sessionOptions()}</select>
+    ${withRepair && !readOnly && s && s.p ? `<button class="btn sm ${s.g || s.f ? 'lock' : ''}" onclick="repairCurrent()">${s.g || s.f ? '🔒' : '🔀'} Re-pair</button>` : ''}</div></div>`;
+}
+/* ---------- matches ---------- */
+function sideHTML(r, i, side, teamName, score, win, av) {
+    const s = cs();
+    const ctl = (readOnly || !s || s.f || !s.g)
+        ? `<div class="big">${score ?? '–'}</div>`
+        : `<div class="step"><button class="hold" type="button" data-r="${r}" data-m="${i}" data-s="${side}" data-d="-1" aria-label="minus">−</button>
+      <input type="number" min="0" max="${MAX_SCORE}" inputmode="numeric" pattern="[0-9]*" value="${score ?? ''}" placeholder="0" aria-label="Score" onchange="setScore(${r},${i},${side},this.value)">
+      <button class="plus hold" type="button" data-r="${r}" data-m="${i}" data-s="${side}" data-d="1" aria-label="plus">+</button></div>`;
+    return `<div class="side ${win ? 'win' : ''}"><div class="team ${win ? 'win' : ''}">${av || ''}<span>${win ? '🏆 ' : ''}${esc(teamName)}</span></div>${ctl}</div>`;
+}
+function renderMatches() {
+    const s = cs();
+    let h = '';
+    if (!s) {
+        h = `<div class="card"><h2>No sessions yet</h2><p class="muted">Add a date on the Avail tab to get started.</p>
+      ${readOnly ? '' : '<button class="btn" onclick="show(\'avail\')">Go to availability</button>'}</div>`;
+        $('matches').innerHTML = h;
+        return;
+    }
+    h += sessionBar(true);
+    if (!s.p) {
+        const n = availIdx(s).filter(isActive).length;
+        h += `<div class="card"><h2>${esc(fmtDate(s.d))} – no pairs yet</h2>
+      <p class="muted">${n} player${n === 1 ? '' : 's'} marked available.${n < 4 ? ' You need at least 4 to make pairs.' : ''}</p>
+      ${readOnly ? '' : `<button class="btn" onclick="show('avail')">Set availability</button>
+      ${n >= 4 ? `<button class="btn sec" onclick="pairFor(${s.id})">🔀 Make random pairs now</button>` : ''}`}</div>`;
+        $('matches').innerHTML = h;
+        return;
+    }
+    const pairs = s.p;
+    const total = totalMatches(s), done = doneCount(s);
+    if (s.f)
+        h += `<div class="fbanner">✅ <b>Session finished</b> – scores are locked, counted in the stats and saved in History.
+    ${readOnly ? '' : `<button class="btn" onclick="goNext()">▶ Start next session</button><button class="btn sec" onclick="reopenSession(${s.id})">Reopen to edit</button>`}</div>`;
+    if (!s.g && !s.f)
+        h += `<div class="sbanner">📋 <b>Pairs ready – session not started.</b> Check the pairs and courts below. When everyone is ready, start the session. <b>Pairs get locked once it starts</b> and scores can be entered.
+    ${readOnly ? '' : `<button class="btn start" onclick="startSession()">▶ Start session</button><button class="btn sec" onclick="repairCurrent()">🔀 Re-pair</button><button class="btn sec" onclick="openPairEditor()">✏️ Edit pairs</button>`}</div>`;
+    if (inProgress(s))
+        h += `<div class="pbanner">▶ <b>Session in progress</b> – pairs and availability are locked.${readOnly || doneCount(s) > 0 ? '' : ` <a href="#" onclick="undoStart();return false" style="color:var(--brand);font-weight:700">Undo start</a>`}</div>`;
+    h += `<div class="card"><b>${done} / ${total}</b> matches played · ${pairs.length} pairs
+    <div class="bar"><div style="width:${total ? done / total * 100 : 0}%"></div></div>
+    ${(!readOnly && s.g && !s.f) ? `<button class="btn fin sm" style="margin-top:12px" onclick="finishSession()">✅ Finish session</button>` : ''}
+    ${s.o.length ? `<div class="rest" style="margin-top:10px">🪑 Sitting out this session: <b>${s.o.map(i => esc(state.players[i])).join(', ')}</b></div>` : ''}</div>`;
+    const sched = scheduleOf(s), R = sched.length;
+    const curR = (s.g && !s.f) ? sched.findIndex((rd, r) => rd.ms.some((_m, i) => !isDone(s, r + '-' + i))) : -1;
+    sched.forEach((rd, r) => {
+        const dn = rd.ms.filter((_m, i) => isDone(s, r + '-' + i)).length, all = dn === rd.ms.length;
+        h += `<div class="card"><div class="rh ${r === curR ? 'cur' : ''}"><span class="rt">Round ${r + 1} of ${R}</span>${r === curR ? '<span class="chip lv"><i class="gdot blink"></i>NOW</span>' : all ? `<span class="chip done">✓ Done</span><span class="rs">${dn}/${rd.ms.length}</span>` : `<span class="rs">${dn}/${rd.ms.length} played</span>`}</div>`;
+        rd.ms.forEach((m, i) => {
+            const k = r + '-' + i, sc = s.c[k] || [null, null], d = isDone(s, k);
+            const live = !d && s.g && !s.f && r === curR;
+            const chip = d ? '<span class="chip done">✓ Done</span>' : live ? '<span class="chip lv"><i class="gdot"></i>Live</span>' : (s.f ? '<span class="chip">Not played</span>' : '<span class="chip">' + (s.g ? 'Upcoming' : 'To play') + '</span>');
+            const aWin = d && sc[0] > sc[1], bWin = d && sc[1] > sc[0];
+            h += `<div class="match ${d ? 'done' : ''} ${live ? 'livem' : ''}"><div class="mhead"><span class="court c${m.court}">Court ${m.court}</span>${chip}</div>
+        ${sideHTML(r, i, 0, pName(s, m.a), sc[0], aWin, pairAv(s, m.a))}${sideHTML(r, i, 1, pName(s, m.b), sc[1], bWin, pairAv(s, m.b))}</div>`;
+        });
+        if (rd.rest.length)
+            h += `<div class="rest">⏸ Resting: ${rd.rest.map(x => esc(pName(s, x))).join(' · ')}</div>`;
+        h += '</div>';
     });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().slice(0, 10);
-      els.sessionInput.value = today;
-      els.supabaseUrl.value = DEFAULT_SUPABASE_URL;
-      els.supabaseAnonKey.value = DEFAULT_SUPABASE_ANON_KEY;
-      els.spaceName.value = DEFAULT_SPACE;
-
-      loadLocal();
-      renderLists();
-
-      const storedUrl = localStorage.getItem('shuttle_supabase_url');
-      const storedKey = localStorage.getItem('shuttle_supabase_key');
-      const storedSpace = localStorage.getItem('shuttle_supabase_space');
-
-      if (storedUrl) els.supabaseUrl.value = storedUrl;
-      if (storedKey) els.supabaseAnonKey.value = storedKey;
-      if (storedSpace) els.spaceName.value = storedSpace;
-
-      updateConfigFromInputs();
-      if (window.SHUTTLE_CONFIG.supabaseUrl && window.SHUTTLE_CONFIG.supabaseAnonKey) {
-        initSupabase();
-        void cloudLoadState();
-        void cloudSaveState();
-      }
+    if (!readOnly && s.g && !s.f)
+        h += `<div class="card"><h2>All done for today?</h2>
+    <p class="muted" style="margin-top:0">Locks this session’s scores, saves it to History and opens the next session so you can set availability and draw new pairs.</p>
+    <button class="btn fin" onclick="finishSession()">✅ Finish session &amp; start next</button></div>`;
+    const y = window.scrollY;
+    $('matches').innerHTML = h;
+    window.scrollTo(0, y);
+}
+/* ---------- play ---------- */
+function renderPlay() {
+    const el = document.getElementById('play');
+    if (!el)
+        return;
+    if (readOnly) {
+        el.innerHTML = '<div class="card muted">Play controls are not available in read-only view.</div>';
+        return;
+    }
+    const ps = currentPlay();
+    let h = '';
+    if (!ps) {
+        h = `<div class="card"><h2>▶ New play session</h2><p class="muted">Choose a date, then start games one by one. Players in an active game are automatically unavailable until that game ends.</p><input type="date" id="playDate" value="${todayISO()}"><button class="btn start" onclick="playSessionStart()">▶ Start play session</button></div>`;
+        const recent = playList().slice().reverse().slice(0, 5);
+        if (recent.length)
+            h += `<div class="card"><h2>Recent play sessions</h2>${recent.map(x => `<div class="snap"><div><b>${esc(fmtDateY(x.date))}</b><br><span class="muted">${x.games.length} game${x.games.length === 1 ? '' : 's'}</span></div><span class="chip done">Ended</span></div>`).join('')}</div>`;
+        el.innerHTML = h;
+        return;
+    }
+    const busy = playBusy(ps), free = state.players.map((_, i) => i).filter(i => isActive(i) && !busy.has(i));
+    h += `<div class="card"><div class="game-top"><div><h2 style="margin:0">${esc(fmtDateY(ps.date))}</h2><span class="muted">${ps.games.filter(g => !g.ended).length} live · ${free.length} available</span></div><span class="chip lv"><i class="gdot"></i>PLAYING</span></div><div class="player-chips">${state.players.map((n, i) => isActive(i) ? `<span class="player-chip ${busy.has(i) ? 'busy' : ''}">${esc(n)} · ${busy.has(i) ? 'playing' : 'available'}</span>` : '').join('')}</div></div>`;
+    if (free.length >= 4 && ps.games.filter(g => !g.ended).length < MAX_COURTS) {
+        const defaults = shuffle(free).slice(0, 4);
+        h += `<div class="card"><h2>Start a game</h2><div class="play-grid"><label class="pa">Pair A : Player 1<select id="pg0">${playOptions(defaults[0])}</select></label><label class="pa">Pair A : Player 2<select id="pg1">${playOptions(defaults[1])}</select></label><label class="pb">Pair B : Player 1<select id="pg2">${playOptions(defaults[2])}</select></label><label class="pb">Pair B : Player 2<select id="pg3">${playOptions(defaults[3])}</select></label></div><div class="play-actions"><button class="btn startgame" onclick="startPlayGame()">▶ Start Game</button></div></div>`;
+    }
+    else
+        h += `<div class="card muted">${free.length < 4 ? 'Fewer than 4 players are available. End a game to release its players.' : 'All courts are currently in use.'}</div>`;
+    const live = ps.games.filter(g => !g.ended), done = ps.games.filter(g => g.ended).reverse();
+    if (live.length)
+        h += `<div class="card"><h2>Games in progress</h2>${live.map(g => `<div class="game-card live-game"><div class="game-top"><span class="court c${g.court}">Court ${g.court}</span><span class="chip lv"><i class="gdot"></i>Live</span></div><div class="game-pairs"><b>${esc(playPairName(g, 0))}</b><span>vs</span><b>${esc(playPairName(g, 1))}</b></div><div class="game-score"><input type="number" min="0" max="${MAX_SCORE}" inputmode="numeric" aria-label="Pair A score" value="${g.score[0] ?? ''}" onchange="setPlayScore(${g.id},0,this.value)"><b>:</b><input type="number" min="0" max="${MAX_SCORE}" inputmode="numeric" aria-label="Pair B score" value="${g.score[1] ?? ''}" onchange="setPlayScore(${g.id},1,this.value)"></div><button class="btn endgame" onclick="endPlayGame(${g.id})">■ End Game</button></div>`).join('')}</div>`;
+    if (done.length)
+        h += `<div class="card"><h2>Completed games</h2>${done.map(g => {
+            const w = g.score[0] > g.score[1] ? 0 : 1, hi = Math.max(...g.score), lo = Math.min(...g.score);
+            return `<div class="gdone"><div class="gd-top"><span>Court ${g.court}</span><span>Final</span></div><div class="gd-win"><span class="gd-cup">🏆</span><div class="gd-wn">${esc(playPairName(g, w))}</div><div class="gd-sc">${hi} <span>:</span> ${lo}</div></div><div class="gd-lose">vs ${esc(playPairName(g, 1 - w))}</div></div>`;
+        }).join('')}</div>`;
+    h += `<div class="card"><button class="btn danger" onclick="playSessionEnd()">■ End play session</button><p class="muted" style="margin-bottom:0">End all active games first. Completed games stay saved on this device.</p></div>`;
+    el.innerHTML = h;
+}
+/* ---------- availability ---------- */
+function renderAvail() {
+    if (readOnly) {
+        $('avail').innerHTML = '';
+        return;
+    }
+    const old = document.getElementById('availWrap');
+    const sl = (old && old.scrollLeft) || 0;
+    const S = state.sessions;
+    let h = `<div class="card"><h2>Add a session date</h2><div class="row2">
+    <input type="date" id="newDate" value="${todayISO()}"><button class="btn sm" onclick="addSession()">＋ Add</button></div>
+    <p class="muted" style="margin-bottom:0">Everyone starts as available. Untick who can’t make it, then tap <b>Pair</b> to draw random pairs for that date.</p></div>`;
+    if (!S.length) {
+        h += '<div class="card muted">No sessions yet – add your first date above.</div>';
+        $('avail').innerHTML = h;
+        return;
+    }
+    h += `<div class="card"><h2>Availability</h2><div class="wrap" id="availWrap"><table class="av"><thead><tr><th class="name">Player</th>`;
+    S.forEach(s => h += `<th class="${s.id === state.cur ? 'cur' : ''}">${esc(fmtDay(s.d))}<small>${esc(fmtDM(s.d))}</small><span class="tag ${inProgress(s) ? 'live' : s.f || s.p ? 'ok' : 'no'}">${s.f ? 'finished' : inProgress(s) ? 'in progress' : s.p ? 'paired' : 'no pairs'}</span></th>`);
+    h += '</tr></thead><tbody>';
+    state.players.forEach((n, pi) => {
+        if (!isActive(pi) && !S.some(x => x.a[pi]))
+            return;
+        h += `<tr><td class="name">${esc(n)}${isActive(pi) ? '' : ' <span class="badge">inactive</span>'}</td>`;
+        S.forEach(s => h += `<td><label class="cb"><input type="checkbox" ${s.a[pi] ? 'checked' : ''} ${s.f ? 'disabled' : ''} onchange="toggleAvail(${s.id},${pi})" aria-label="${esc(n)} ${esc(fmtDate(s.d))}"></label></td>`);
+        h += '</tr>';
     });
-
-    window.addEventListener('beforeunload', () => {
-      updateConfigFromInputs();
-      localStorage.setItem('shuttle_supabase_url', window.SHUTTLE_CONFIG.supabaseUrl);
-      localStorage.setItem('shuttle_supabase_key', window.SHUTTLE_CONFIG.supabaseAnonKey);
-      localStorage.setItem('shuttle_supabase_space', window.SHUTTLE_CONFIG.space);
-      if (window.supabaseClient) {
-        clearTimeout(cloudSyncTimer);
-      }
+    h += `<tr><td class="name"><b>Available</b></td>`;
+    S.forEach(s => { const n = availIdx(s).filter(isActive).length; h += `<td class="cnt ${n < 4 ? 'bad' : 'good'}">${n}/${activeCount()}</td>`; });
+    h += `</tr><tr><td class="name"></td>`;
+    S.forEach(s => {
+        const n = availIdx(s).filter(isActive).length;
+        h += s.f
+            ? `<td><div class="acts"><button onclick="reopenSession(${s.id})">Reopen</button><button class="del" onclick="delSession(${s.id})">Delete</button></div></td>`
+            : s.g ? `<td><div class="acts"><button class="lock" onclick="pairFor(${s.id})">🔒 Re-pair</button><button class="del" onclick="delSession(${s.id})">Delete</button></div></td>`
+                : `<td><div class="acts"><button class="go" ${n < 4 ? 'disabled style="opacity:.4"' : ''} onclick="pairFor(${s.id})">🔀 ${s.p ? 'Re-pair' : 'Pair'}</button>
+    <button onclick="toggleAll(${s.id})">${activeAll(s) ? 'None' : 'All'}</button><button class="del" onclick="delSession(${s.id})">Delete</button></div></td>`;
     });
+    h += '</tr></tbody></table></div>';
+    h += `<p class="muted">• Odd number available: one player sits out (rotated fairly across sessions).<br>
+  • Pairs are random but avoid repeating earlier partners where possible.<br>
+  • Changing availability on a paired date resets that date’s pairs.<br>
+  • Once a session is <b>started</b>, pairs and availability are locked (re-pair is blocked). Finished sessions are locked too – tap <b>Reopen</b> to edit.<br>
+  • Every session you finish is kept in the <b>History</b> tab.</p></div>`;
+    $('avail').innerHTML = h;
+    const w = document.getElementById('availWrap');
+    if (w)
+        w.scrollLeft = sl;
+}
+/* ---------- pair standings ---------- */
+let pairMode = 'session';
+function setPairMode(m) { pairMode = m; renderStandings(); }
+function renderStandings() {
+    const s = cs();
+    let h = `<div class="seg"><button type="button" class="${pairMode === 'session' ? 'on' : ''}" onclick="setPairMode('session')">This session</button>
+    <button type="button" class="${pairMode === 'all' ? 'on' : ''}" onclick="setPairMode('all')">All sessions</button></div>`;
+    const el = $('standings');
+    if (pairMode === 'all') {
+        const rows = pairReport();
+        h += `<div class="card"><h2>Overall pair leaderboard</h2>`;
+        if (!rows.length)
+            h += '<p class="muted">No scored matches or Play games yet.</p>';
+        else {
+            h += `<table class="st"><tr><th>#</th><th class="name">Pair</th><th>S</th><th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>+/-</th></tr>`;
+            rows.forEach((x, i) => h += `<tr class="${i === 0 && x.p > 0 ? 'top' : ''}"><td>${i + 1}</td><td class="name">${pairAvIds(x)}${pairNm(x)}</td><td>${x.s}</td><td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.pf}</td><td>${x.pa}</td><td>${signed(x.pf - x.pa)}</td></tr>`);
+            const pg = playGamesDone().length;
+            h += `</table><p class="muted">S = sessions together (incl. Play sessions) · P = matches · W/L = wins/losses · PF/PA = points scored/conceded.<br>Includes ${pg} game${pg === 1 ? '' : 's'} from the Play tab. Ranked by wins, then point difference, then points scored.</p>`;
+        }
+        el.innerHTML = h + '</div>';
+        return;
+    }
+    h += sessionBar(false);
+    if (!s) {
+        el.innerHTML = h + '<div class="card muted">No session selected.</div>';
+        return;
+    }
+    const st = pairRowsFor(s), plays = playGamesOn(s.d);
+    if (!s.p && !plays.length) {
+        el.innerHTML = h + '<div class="card muted">No pairs for this session yet.</div>';
+        return;
+    }
+    h += `<div class="card"><h2>Pair standings · ${esc(fmtDate(s.d))}</h2><table class="st"><tr><th>#</th><th class="name">Pair</th><th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>+/-</th></tr>`;
+    st.forEach((x, i) => h += `<tr class="${i === 0 && x.p > 0 ? 'top' : ''}"><td>${i + 1}</td><td class="name">${pairAvIds(x)}${pairNm(x)}</td><td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.pf}</td><td>${x.pa}</td><td>${signed(x.pf - x.pa)}</td></tr>`);
+    h += `</table><p class="muted">P = matches · W/L = wins/losses · PF = points scored · PA = points conceded.<br>Ranked by wins, then point difference, then points scored. Points are shown for stats; the rank is still decided by wins.${plays.length ? `<br>🎮 Includes ${plays.length} game${plays.length === 1 ? '' : 's'} from the Play tab on this date.` : ''}</p></div>`;
+    h += `<div class="card"><h2>Points per match</h2>`;
+    if (!st.some(x => x.p))
+        h += '<p class="muted">Enter scores on the Matches tab or end a game on the Play tab to see each pair’s points here.</p>';
+    else
+        st.forEach(x => {
+            if (!x.log.length)
+                return;
+            h += `<details class="pm"><summary><span>${pairAvIds(x)}<b>${pairNm(x)}</b></span><span>${x.pf} pts · avg ${avg(x.pf, x.p)}</span></summary>
+      <table class="pl"><tr><th>Rd</th><th class="name">Opponent</th><th>For</th><th>Agst</th><th></th></tr>`;
+            x.log.forEach(m => {
+                const w = m.f > m.a, l = m.f < m.a;
+                h += `<tr><td>${m.r}</td><td class="name">${esc(m.opp)}</td><td><b>${m.f}</b></td><td>${m.a}</td><td class="${w ? 'w' : l ? 'l' : ''}">${w ? 'W' : l ? 'L' : 'D'}</td></tr>`;
+            });
+            h += `<tr><td></td><td class="name"><b>Total</b></td><td><b>${x.pf}</b></td><td><b>${x.pa}</b></td><td></td></tr></table></details>`;
+        });
+    h += '</div>';
+    el.innerHTML = h;
+}
+/* ---------- players ---------- */
+function setPM(m) { playerMode = m; renderPlayers(); }
+function renderPlayers() {
+    const s = cs();
+    let h = `<div class="seg"><button type="button" class="${playerMode === 'session' ? 'on' : ''}" onclick="setPM('session')">This session</button>
+    <button type="button" class="${playerMode === 'all' ? 'on' : ''}" onclick="setPM('all')">All sessions</button></div>`;
+    if (playerMode === 'session')
+        h += sessionBar(false);
+    const list = playerMode === 'all' ? state.sessions : (s ? [s] : []);
+    const plays = playerMode === 'all' ? playGamesDone() : (s ? playGamesOn(s.d) : []);
+    const all = playerStats(list, plays);
+    const inSession = new Set(s && s.p ? s.p.flat() : []);
+    plays.forEach(({ g }) => g.players.forEach(i => inSession.add(i)));
+    const rows = playerMode === 'session' ? all.filter(x => inSession.has(x.i)) : all.filter(x => x.s > 0 || x.p > 0);
+    h += `<div class="card"><h2>${playerMode === 'all' ? 'Overall leaderboard' : 'Individual standings'}</h2>`;
+    if (!rows.length)
+        h += '<p class="muted">No results yet.</p>';
+    else {
+        h += `<table class="st"><tr><th>#</th><th class="name">Player</th>${playerMode === 'all' ? '<th>S</th>' : ''}<th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>+/-</th></tr>`;
+        rows.forEach((x, i) => h += `<tr class="${i === 0 && x.p > 0 ? 'top' : ''}"><td>${i + 1}</td><td class="name">${avatar(x.i)}${esc(x.n)}</td>${playerMode === 'all' ? `<td>${x.s}</td>` : ''}<td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.pf}</td><td>${x.pa}</td><td>${signed(x.pf - x.pa)}</td></tr>`);
+        h += '</table><p class="muted">' + (playerMode === 'all' ? 'S = sessions played · ' : '') + 'P = matches · PF/PA = points scored/conceded by the player’s pair · +/- = difference. Points are for stats; ranking is by wins.</p>';
+        if (plays.length)
+            h += `<p class="muted">🎮 Includes ${plays.length} game${plays.length === 1 ? '' : 's'} from the Play tab${playerMode === 'all' ? '' : ' on this date'}.</p>`;
+    }
+    $('players').innerHTML = h + '</div>';
+}
+/* ---------- session history ---------- */
+let histFilter = 'all', histPlayer = -1, histPairsAll = false;
+const histOpen = new Set();
+function histToggle(id, o) { if (o)
+    histOpen.add(id);
+else
+    histOpen.delete(id); }
+function setHistFilter(f) { histFilter = f; renderHistory(); }
+function setHistPlayer(v) { histPlayer = +v; renderHistory(); }
+const sessLabel = (s) => s.f ? 'finished' : inProgress(s) ? 'in progress' : s.p ? 'paired' : 'no pairs';
+const sessTag = (s) => s.f ? 'ok' : inProgress(s) ? 'live' : 'no';
+const sessPoints = (s) => Object.values(s.c).reduce((t, x) => t + (x[0] || 0) + (x[1] || 0), 0);
+function openSession(id) { state.cur = id; save(); renderAll(); show('matches'); }
+function shareSession(id) { const s = sById(id); if (!s)
+    return; void shareOrCopy({ title: 'Shuttle Mate results', text: sessionText(s) }, 'Results copied – paste into Teams / WhatsApp'); }
+function waSession(id) { const s = sById(id); if (!s)
+    return; waOpen(sessionText(s)); }
+function histBody(s) {
+    if (!s.p)
+        return `<p class="muted" style="margin-bottom:0">No pairs were drawn for this date. ${availIdx(s).filter(isActive).length} player(s) were marked available.</p>`;
+    let h = '<h3 style="margin-top:12px">Pairs</h3><ol>' + s.p.map((_, i) => `<li>${esc(pName(s, i))}</li>`).join('') + '</ol>';
+    if (s.o.length)
+        h += `<div class="rest" style="margin-top:8px">🪑 Sat out: <b>${s.o.map(i => esc(state.players[i])).join(', ')}</b></div>`;
+    const st = pairStats(s);
+    if (st.some(x => x.p)) {
+        h += '<h3>Standings</h3><table class="st"><tr><th>#</th><th class="name">Pair</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>+/-</th></tr>';
+        st.forEach((x, i) => h += `<tr class="${i === 0 && x.p > 0 ? 'top' : ''}"><td>${i + 1}</td><td class="name">${esc(pName(s, x.id))}</td><td>${x.w}</td><td>${x.l}</td><td>${x.pf}</td><td>${x.pa}</td><td>${signed(x.pf - x.pa)}</td></tr>`);
+        h += '</table>';
+    }
+    h += '<h3>Scores</h3><table class="hm">';
+    let any = false;
+    scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+        const k = r + '-' + i, c = s.c[k], d = isDone(s, k);
+        any = true;
+        h += `<tr><td class="muted">R${r + 1}·C${m.court}</td><td class="name ${d && c[0] > c[1] ? 'win' : ''}">${esc(pName(s, m.a))}</td>
+      <td class="sc">${c && c[0] !== null ? c[0] : '–'} : ${c && c[1] !== null ? c[1] : '–'}</td><td class="name ${d && c[1] > c[0] ? 'win' : ''}">${esc(pName(s, m.b))}</td></tr>`;
+    }));
+    return h + (any ? '' : '<tr><td class="muted">No matches</td></tr>') + '</table>';
+}
+function toggleHistPairs() { histPairsAll = !histPairsAll; renderHistory(); }
+function bestPairsHTML() {
+    const rows = pairReport();
+    if (!rows.length)
+        return `<div class="card"><h2>🏆 Best pairs</h2><p class="muted" style="margin-bottom:0">No scored matches or play games yet. Once scores are entered, the pairs with the most wins will appear here.</p></div>`;
+    const mx = rows[0].w, leaders = rows.filter(r => r.w === mx);
+    const rate = (r) => r.p ? Math.round(r.w / r.p * 100) + '%' : '–';
+    let h = `<div class="card"><h2>🏆 Best pairs</h2><p class="muted" style="margin-top:0">Most wins as a partnership across all sessions and play games (scored only).</p>`;
+    if (mx === 0)
+        h += `<p class="muted">No pair has won a match yet.</p>`;
+    else
+        h += leaders.map(r => `<div class="bp-top"><span class="tr">🏆</span><div style="min-width:0"><div class="lbl">${leaders.length > 1 ? 'Joint most wins' : 'Most wins'}</div><div class="nm">${pairAvIds(r)} ${pairNm(r)}</div><div class="ds">${r.w} win${r.w === 1 ? '' : 's'} from ${r.p} match${r.p === 1 ? '' : 'es'} · ${rate(r)} win rate · ${r.s} session${r.s === 1 ? '' : 's'} together</div></div></div>`).join('');
+    const shown = histPairsAll ? rows : rows.slice(0, 5);
+    h += `<table class="bp"><tr><th>#</th><th class="name">Pair</th><th>P</th><th>W</th><th>L</th><th>Win%</th><th>+/-</th></tr>`;
+    shown.forEach(r => {
+        const rank = 1 + rows.findIndex(x => x.w === r.w && (x.pf - x.pa) === (r.pf - r.pa) && x.pf === r.pf), d = r.pf - r.pa;
+        h += `<tr class="${mx > 0 && r.w === mx ? 'lead' : ''}"><td>${rank}</td><td class="name">${pairAvIds(r)}${pairNm(r)}</td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td><td>${rate(r)}</td><td class="${d > 0 ? 'pos' : d < 0 ? 'neg' : ''}">${signed(d)}</td></tr>`;
+    });
+    h += '</table>';
+    if (rows.length > 5)
+        h += `<button class="btn sec" onclick="toggleHistPairs()">${histPairsAll ? 'Show top 5 only' : 'Show all ' + rows.length + ' pairs'}</button>`;
+    return h + `<p class="muted" style="margin:8px 0 0;font-size:12px">P = matches played · W = won · L = lost · +/- = points for minus against. Ties on wins are split by points difference.</p></div>`;
+}
+function playHistoryHTML() {
+    const groups = playList().map(ps => ({ ps, gs: (ps.games || []).map((g, n) => ({ g, n: n + 1 })).filter(x => x.g.ended && x.g.score && x.g.score[0] !== null && (histPlayer < 0 || x.g.players.includes(histPlayer))) }))
+        .filter(x => x.gs.length).sort((a, b) => a.ps.date < b.ps.date ? 1 : a.ps.date > b.ps.date ? -1 : b.ps.id - a.ps.id);
+    if (!groups.length)
+        return '';
+    const games = groups.reduce((t, x) => t + x.gs.length, 0), pts = groups.reduce((t, x) => t + x.gs.reduce((u, y) => u + y.g.score[0] + y.g.score[1], 0), 0);
+    const plrs = new Set(groups.flatMap(x => x.gs.flatMap(y => y.g.players))).size;
+    let h = `<div class="card"><h2>🎮 Play games</h2><div class="stats4"><div><b>${groups.length}</b><span>play sessions</span></div><div><b>${games}</b><span>games</span></div><div><b>${pts}</b><span>total points</span></div><div><b>${plrs}</b><span>players</span></div></div></div>`;
+    groups.forEach(({ ps, gs }) => {
+        const key = "'p" + ps.id + "'";
+        h += `<details class="hs" ${histOpen.has('p' + ps.id) ? 'open' : ''} ontoggle="histToggle(${key},this.open)"><summary><div class="hs-main"><div class="hs-title">${esc(fmtDateY(ps.date))} <span class="tag ${ps.ended ? 'ok' : 'live'}">${ps.ended ? 'finished' : 'in progress'}</span></div><div class="hs-sub">Play session · ${gs.length} game${gs.length === 1 ? '' : 's'}</div></div><span class="chev">›</span></summary><div class="hs-body">`;
+        gs.slice().reverse().forEach(({ g, n }) => {
+            const w = g.score[0] > g.score[1] ? 0 : 1, hi = Math.max(...g.score), lo = Math.min(...g.score), t = new Date(g.ended).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
+            h += `<div class="hg"><div class="hg-meta">Game ${n} · Court ${g.court} · ${esc(t)}${readOnly ? '' : ` <button class="hg-x" onclick="delPlayGame(${ps.id},${g.id})">Delete</button>`}</div><div class="hg-row"><span class="hg-w">🏆 ${esc(playPairName(g, w))}</span><span class="hg-s">${hi} : ${lo}</span><span class="hg-l">${esc(playPairName(g, 1 - w))}</span></div></div>`;
+        });
+        if (!readOnly && ps.ended)
+            h += `<div class="hs-acts"><button class="btn danger" onclick="delPlaySession(${ps.id})">Delete play session</button></div>`;
+        h += '</div></details>';
+    });
+    return h;
+}
+function renderHistory() {
+    const el = document.getElementById('history');
+    if (!el)
+        return;
+    const S = state.sessions;
+    if (!S.length) {
+        if (playGamesDone().length) {
+            el.innerHTML = bestPairsHTML() + playHistoryHTML();
+            return;
+        }
+        el.innerHTML = '<div class="card"><h2>📜 Session history</h2><p class="muted" style="margin-bottom:0">No sessions yet. Finished sessions and play games, with their pairs and scores, will be listed here.</p></div>';
+        return;
+    }
+    const played = S.filter(s => doneCount(s) > 0);
+    const matches = S.reduce((t, s) => t + doneCount(s), 0), pts = S.reduce((t, s) => t + sessPoints(s), 0);
+    let h = `<div class="card"><h2>📜 Session history</h2>
+    <div class="stats4"><div><b>${S.filter(s => s.f).length}</b><span>finished</span></div><div><b>${played.length}</b><span>with scores</span></div>
+    <div><b>${matches}</b><span>matches</span></div><div><b>${pts}</b><span>total points</span></div></div>`;
+    if (!readOnly)
+        h += `<div class="bkstat" style="margin-top:12px">${bkStatusHTML()}</div>
+    <button class="btn sec" onclick="show('setup');setTimeout(()=>{const e=document.getElementById('bkCard');if(e)e.scrollIntoView({behavior:'smooth'})},50)">💾 Backup &amp; restore</button>`;
+    h += '</div>';
+    h += bestPairsHTML();
+    const seen = new Set();
+    S.forEach(s => { if (s.p) {
+        s.p.flat().forEach(i => seen.add(i));
+        s.o.forEach(i => seen.add(i));
+    } });
+    playGamesDone().forEach(({ g }) => g.players.forEach(i => seen.add(i)));
+    const names = [...seen].sort((a, b) => state.players[a].localeCompare(state.players[b]));
+    if (histPlayer >= 0 && !seen.has(histPlayer))
+        histPlayer = -1;
+    h += `<div class="card filters"><div class="seg" style="margin:0">
+      <button type="button" class="${histFilter === 'all' ? 'on' : ''}" onclick="setHistFilter('all')">All</button>
+      <button type="button" class="${histFilter === 'finished' ? 'on' : ''}" onclick="setHistFilter('finished')">Finished</button>
+      <button type="button" class="${histFilter === 'open' ? 'on' : ''}" onclick="setHistFilter('open')">Open</button></div>
+    <select onchange="setHistPlayer(this.value)" aria-label="Filter by player"><option value="-1">All players</option>
+      ${names.map(i => `<option value="${i}" ${i === histPlayer ? 'selected' : ''}>${esc(state.players[i])}</option>`).join('')}</select>`;
+    if (histPlayer >= 0) {
+        const q = playerStats(S).find(x => x.i === histPlayer);
+        if (q)
+            h += `<div class="muted" style="font-size:14px;color:var(--ink)"><b>${esc(q.n)}</b> · ${q.s} session${q.s === 1 ? '' : 's'} · ${q.p} match${q.p === 1 ? '' : 'es'} · ${q.w}W ${q.l}L · win rate ${q.p ? Math.round(q.w / q.p * 100) + '%' : '–'} · ${q.pf} pts for, ${q.pa} against</div>`;
+        const pq = playPlayerStats(histPlayer);
+        if (pq.p)
+            h += `<div class="muted" style="font-size:14px;color:var(--ink)">🎮 Play games: ${pq.p} game${pq.p === 1 ? '' : 's'} · ${pq.w}W ${pq.l}L · win rate ${Math.round(pq.w / pq.p * 100)}% · ${pq.pf} pts for, ${pq.pa} against</div>`;
+    }
+    h += '</div>';
+    let list = S.slice().sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : b.id - a.id);
+    if (histFilter === 'finished')
+        list = list.filter(s => s.f);
+    if (histFilter === 'open')
+        list = list.filter(s => !s.f);
+    if (histPlayer >= 0)
+        list = list.filter(s => s.p && (s.p.flat().includes(histPlayer) || s.o.includes(histPlayer)));
+    if (!list.length)
+        h += '<div class="card muted">No sessions match this filter.</div>';
+    list.forEach(s => {
+        const st = pairStats(s), lead = st[0] && st[0].p > 0 ? st[0] : null;
+        let sub = s.p ? `${doneCount(s)}/${totalMatches(s)} matches · ${s.p.length} pairs` : 'Not paired';
+        if (lead)
+            sub += ` · ${s.f ? '🏆' : '▶ leading:'} ${esc(pName(s, lead.id))}`;
+        let me = '';
+        if (histPlayer >= 0 && s.p) {
+            const pi = s.p.findIndex(pr => pr.includes(histPlayer));
+            if (pi >= 0) {
+                const x = st.find(z => z.id === pi);
+                me = `${esc(state.players[histPlayer])}: with ${esc(state.players[s.p[pi].find(v => v !== histPlayer)])} · ${x.w}W ${x.l}L · ${x.pf}–${x.pa}`;
+            }
+            else
+                me = `${esc(state.players[histPlayer])} sat out`;
+        }
+        h += `<details class="hs" ${histOpen.has(s.id) ? 'open' : ''} ontoggle="histToggle(${s.id},this.open)">
+      <summary><div class="hs-main"><div class="hs-title">${esc(fmtDateY(s.d))} <span class="tag ${sessTag(s)}">${sessLabel(s)}</span></div>
+        <div class="hs-sub">${sub}</div>${me ? `<div class="hs-me">${me}</div>` : ''}</div><span class="chev">›</span></summary>
+      <div class="hs-body">${histBody(s)}
+        <div class="hs-acts">
+          <button class="btn" onclick="openSession(${s.id})">Open</button>
+          ${s.p ? `<button class="btn sec" onclick="shareSession(${s.id})">Share</button><button class="btn wa" onclick="waSession(${s.id})">WhatsApp</button>` : ''}
+          ${readOnly ? '' : (s.f ? `<button class="btn sec" onclick="reopenSession(${s.id});show('matches')">Reopen</button>` : '') + `<button class="btn danger" onclick="delSession(${s.id})">Delete</button>`}
+        </div></div></details>`;
+    });
+    h += playHistoryHTML();
+    el.innerHTML = h;
+}
 
-    renderLists();
-  </script>
+"use strict";
+/* ---------- backup & restore ---------- */
+const BK_KEY = 'badminton_last_backup';
+const URL_KEY = 'badminton_app_url';
+const savedUrl = () => { try {
+    return localStorage.getItem(URL_KEY) || '';
+}
+catch (e) {
+    return '';
+} };
+function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++)
+    h = ((h << 5) + h + s.charCodeAt(i)) | 0; return h; }
+const stateSig = () => { const j = JSON.stringify(state); return hashStr(j) + ':' + j.length; };
+function bkInfo() { try {
+    return JSON.parse(localStorage.getItem(BK_KEY) || 'null');
+}
+catch (e) {
+    return null;
+} }
+function bkStatusHTML() {
+    const b = bkInfo();
+    if (!b)
+        return '⚠️ <b>No backup yet.</b> Download one so your scores are safe if this browser is cleared or you change phone.';
+    const same = b.sig === stateSig();
+    return (same ? '✅' : '⚠️') + ' Last backup: <b>' + esc(fmtWhen(b.t)) + '</b>' + (same ? ' · up to date' : ' · you have made changes since');
+}
+function markBackup() {
+    try {
+        localStorage.setItem(BK_KEY, JSON.stringify({ t: Date.now(), sig: stateSig() }));
+    }
+    catch (e) { /* ignore */ }
+    const el = document.getElementById('bkStatus');
+    if (el)
+        el.innerHTML = bkStatusHTML();
+}
+function backupJSON() {
+    return JSON.stringify({ app: 'badminton-tracker', format: 1, version: APP_VERSION, exportedAt: new Date().toISOString(), appUrl: savedUrl() || undefined, data: state }, null, 2);
+}
+function backupName() { const d = new Date(); return 'shuttle-mate-backup-' + todayISO() + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.json'; }
+async function downloadBackup() {
+    if (readOnly)
+        return;
+    if (!state.sessions.length && !await ask('There are no sessions yet. Download a backup anyway?'))
+        return;
+    const url = URL.createObjectURL(new Blob([backupJSON()], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = backupName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    markBackup();
+    toast('Backup saved – check your Downloads folder');
+}
+async function shareBackup() {
+    if (readOnly)
+        return;
+    try {
+        const f = new File([backupJSON()], backupName(), { type: 'application/json' });
+        if (navigator.canShare && navigator.canShare({ files: [f] })) {
+            await navigator.share({ files: [f], title: 'Shuttle Mate backup', text: 'Shuttle Mate backup – ' + fmtDateY(todayISO()) });
+            markBackup();
+            return;
+        }
+    }
+    catch (e) {
+        if (e && e.name === 'AbortError')
+            return;
+    }
+    toast('Sharing files isn’t supported here – downloading instead');
+    void downloadBackup();
+}
+async function copyBackup() {
+    if (readOnly)
+        return;
+    if (await copyText(backupJSON())) {
+        markBackup();
+        toast('Backup text copied – paste it somewhere safe (e.g. a note to yourself)');
+    }
+    else
+        toast('Could not copy – use “Download backup file” instead');
+}
+function parseBackup(txt) {
+    let o = null;
+    try {
+        o = JSON.parse(String(txt).replace(/^\uFEFF/, '').trim());
+    }
+    catch (e) {
+        return { err: 'That doesn’t look like a Shuttle Mate backup (the text couldn’t be read).' };
+    }
+    const data = (o && typeof o === 'object' && o.data && typeof o.data === 'object') ? o.data : o;
+    const st = normalizeState(data);
+    if (!st)
+        return { err: 'This file isn’t a valid Shuttle Mate backup, or it has an unsupported number of players (' + MIN_PLAYERS + '–' + MAX_PLAYERS + ' are allowed).' };
+    return { st, meta: (o && o.app === 'badminton-tracker') ? o : null };
+}
+async function doRestore(txt) {
+    if (readOnly)
+        return;
+    const r = parseBackup(txt);
+    if (r.err || !r.st) {
+        warn(r.err || 'Could not read backup.');
+        return;
+    }
+    const when = r.meta && r.meta.exportedAt && !isNaN(new Date(r.meta.exportedAt).getTime()) ? '\nBacked up: ' + fmtWhen(r.meta.exportedAt) : '';
+    const cur = state.sessions.length ? '\n\nThis REPLACES the ' + state.sessions.length + ' session' + (state.sessions.length === 1 ? '' : 's') + ' currently on this device. Your current data is saved as a restore point first, so you can undo this.' : '';
+    if (!await ask('Restore this backup?\n\n' + describeState(r.st) + when + cur))
+        return;
+    snap('before restoring a backup');
+    state = r.st;
+    if (r.meta && r.meta.appUrl && /^https?:\/\//i.test(r.meta.appUrl)) {
+        try {
+            localStorage.setItem(URL_KEY, String(r.meta.appUrl).split('#')[0]);
+        }
+        catch (e) { /* ignore */ }
+    }
+    save();
+    markBackup();
+    renderAll();
+    toast('Backup restored ✅ ' + state.sessions.length + ' session' + (state.sessions.length === 1 ? '' : 's'));
+}
+function pickBackup(inp) {
+    const f = inp.files && inp.files[0];
+    if (!f)
+        return;
+    if (f.size > 5 * 1024 * 1024) {
+        warn('That file is too large to be a Shuttle Mate backup.');
+        inp.value = '';
+        return;
+    }
+    const rd = new FileReader();
+    rd.onload = () => { inp.value = ''; void doRestore(String(rd.result)); };
+    rd.onerror = () => { inp.value = ''; warn('Couldn’t read that file.'); };
+    rd.readAsText(f);
+}
+function restoreFromText() {
+    const t = ($in('bkText')?.value || '').trim();
+    if (!t) {
+        toast('Paste the backup text first');
+        return;
+    }
+    void doRestore(t);
+}
+/* ---------- share texts & links ---------- */
+function sessionText(s) {
+    let t = `🏸 Shuttle Mate – ${fmtDate(s.d)} (${s.f ? 'FINAL · ' : s.g ? 'LIVE · ' : ''}${doneCount(s)}/${totalMatches(s)} played)\n`;
+    if (!s.p)
+        return t + '\nNo pairs yet.';
+    t += '\n👥 Pairs\n' + s.p.map((_, i) => `• ${pName(s, i)}`).join('\n');
+    if (s.o.length)
+        t += `\n🪑 Sitting out: ${s.o.map(i => state.players[i]).join(', ')}`;
+    t += '\n\n🏆 Standings\n';
+    pairStats(s).forEach((x, i) => t += `${i + 1}. ${pName(s, x.id)} – ${x.w}W ${x.l}L · ${x.pf} pts for, ${x.pa} against (${x.pf - x.pa >= 0 ? '+' : ''}${x.pf - x.pa})\n`);
+    t += '\n📋 Matches\n';
+    scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+        const c = s.c[r + '-' + i];
+        t += `R${r + 1} C${m.court}: ${pName(s, m.a)} ${c && c[0] !== null ? c[0] : '-'} – ${c && c[1] !== null ? c[1] : '-'} ${pName(s, m.b)}\n`;
+    }));
+    return t.trim();
+}
+function overallText() {
+    let t = `🏅 Shuttle Mate overall leaderboard (${state.sessions.filter(s => doneCount(s)).length} sessions played)\n\n`;
+    playerStats(state.sessions, playGamesDone()).filter(x => x.s > 0 || x.p > 0).forEach((x, i) => t += `${i + 1}. ${x.n} – ${x.w}W ${x.l}L · ${x.pf} pts for, ${x.pa} against (${x.pf - x.pa >= 0 ? '+' : ''}${x.pf - x.pa}) · ${x.s} session${x.s === 1 ? '' : 's'}\n`);
+    return t.trim();
+}
+function shareResults() { const s = cs(); if (!s) {
+    toast('Add a session first');
+    return;
+} void shareOrCopy({ title: 'Shuttle Mate results', text: sessionText(s) }, 'Results copied – paste into Teams / WhatsApp'); }
+const b64e = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const b64d = (s) => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))));
+function baseUrl() {
+    const sv = savedUrl();
+    if (sv)
+        return sv;
+    return /^https?:/.test(location.protocol) ? location.href.split('#')[0].split('?')[0] : '';
+}
+function saveAppUrl() {
+    let v = (($in('appUrl') || { value: '' }).value || '').trim();
+    if (v && !/^https?:\/\//i.test(v))
+        v = 'https://' + v;
+    v = v.split('#')[0];
+    try {
+        if (v)
+            localStorage.setItem(URL_KEY, v);
+        else
+            localStorage.removeItem(URL_KEY);
+    }
+    catch (e) { /* ignore */ }
+    renderShare();
+    toast(v ? 'Web address saved' : 'Web address cleared');
+}
+function buildLink(ro) {
+    const base = baseUrl().replace(/^(https?:\/\/[^/]+)$/, '$1/');
+    const o = { n: state.players, x: state.players.map((_, i) => i).filter(i => !isActive(i)), u: state.cur, s: state.sessions.map(s => ({ i: s.id, d: s.d, a: availIdx(s), p: s.p, o: s.o, c: s.c, f: s.f ? 1 : 0, g: s.g ? 1 : 0 })) };
+    return base + '#' + (ro ? 'v=1&' : '') + 'd=' + b64e(o);
+}
+function readHash() {
+    if (!location.hash || location.hash.length < 4)
+        return null;
+    const q = new URLSearchParams(location.hash.slice(1)), d = q.get('d');
+    if (!d)
+        return null;
+    try {
+        const o = b64d(d);
+        if (!o || !Array.isArray(o.n) || !Array.isArray(o.s))
+            return null;
+        const n = o.n.length;
+        const st = normalizeState({
+            players: o.n, active: o.n.map((_, i) => !(Array.isArray(o.x) && o.x.includes(i))), cur: o.u,
+            sessions: o.s.map((x) => ({ id: x.i, d: x.d, a: Array.from({ length: n }, (_, i) => Array.isArray(x.a) && x.a.includes(i)), p: x.p, o: x.o, c: x.c, f: !!x.f, g: !!x.g })),
+        });
+        return st ? { ro: q.get('v') === '1', st } : null;
+    }
+    catch (e) {
+        return null;
+    }
+}
+function waOpen(text) { window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); }
+function needUrl() {
+    if (baseUrl())
+        return false;
+    toast('Paste your hosted web address first (see “Make links work” below)');
+    const el = $in('appUrl');
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+    }
+    return true;
+}
+function pairsText(s) {
+    let t = `🏸 Shuttle Mate – ${fmtDate(s.d)}\n\n👥 Pairs\n` + s.p.map((_, i) => `${i + 1}. ${pName(s, i)}`).join('\n');
+    if (s.o.length)
+        t += `\n\n🪑 Sitting out: ${s.o.map(i => state.players[i]).join(', ')}`;
+    const rds = scheduleOf(s);
+    if (rds.length)
+        t += '\n\n🎯 Round 1\n' + rds[0].ms.map(m => `Court ${m.court}: ${pName(s, m.a)} vs ${pName(s, m.b)}`).join('\n');
+    return t;
+}
+function waPairs() {
+    const s = cs();
+    if (!s || !s.p) {
+        toast('Make pairs first (Avail tab)');
+        return;
+    }
+    let t = pairsText(s);
+    if (baseUrl())
+        t += '\n\n📊 Live scores & full fixtures:\n' + buildLink(true);
+    waOpen(t);
+}
+function waResults() { const s = cs(); if (!s || !s.p) {
+    toast('Nothing to share yet');
+    return;
+} waOpen(sessionText(s)); }
+function waOverall() { if (!state.sessions.some(doneCount) && !playGamesDone().length) {
+    toast('No scores recorded yet');
+    return;
+} waOpen(overallText()); }
+function waLink() { if (needUrl())
+    return; waOpen('🏸 Shuttle Mate live scores & fixtures (view only):\n' + buildLink(true)); }
+function shareLink(ro) {
+    if (needUrl())
+        return;
+    void shareOrCopy({ title: 'Shuttle Mate', text: ro ? 'Shuttle Mate live scores:' : 'Shuttle Mate (editable):', url: buildLink(ro) }, 'Link copied');
+}
+function exportCSV() {
+    const rows = [['Date', 'Status', 'Round', 'Court', 'Pair A', 'Score A', 'Score B', 'Pair B', 'Source']];
+    state.sessions.forEach(s => scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+        const c = s.c[r + '-' + i] || ['', ''];
+        rows.push([s.d, s.f ? 'Finished' : s.g ? 'In progress' : 'Not started', r + 1, m.court, pName(s, m.a), c[0] ?? '', c[1] ?? '', pName(s, m.b), 'Session']);
+    })));
+    playList().forEach(ps => (ps.games || []).forEach((g, n) => {
+        if (!g.ended)
+            return;
+        rows.push([ps.date, ps.ended ? 'Finished' : 'In progress', 'Game ' + (n + 1), g.court, playPairName(g, 0), g.score[0] ?? '', g.score[1] ?? '', playPairName(g, 1), 'Play']);
+    }));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'shuttle_mate_results.csv';
+    a.click();
+}
+/* ---------- share + setup screens ---------- */
+function renderShare() {
+    const web = /^https?:/.test(location.protocol), sv = savedUrl(), s = cs();
+    $('share').innerHTML = `
+  <div class="card"><h2>Send to WhatsApp</h2>
+    <p class="muted" style="margin-top:0">Opens WhatsApp – pick your badminton group and hit send.</p>
+    <button class="btn wa" onclick="waPairs()">👥 Today’s pairs &amp; Round 1<small>${s && s.p ? esc(fmtDate(s.d)) + ' · with live-view link' : 'Make pairs first on the Avail tab'}</small></button>
+    <button class="btn wa" onclick="waResults()">🏆 Results &amp; standings<small>Pairs, standings and every score for this session</small></button>
+    <button class="btn wa" onclick="waOverall()">🏅 Overall leaderboard<small>Across all sessions</small></button>
+    <button class="btn wa" onclick="waLink()">🔗 Live-view link only<small>Players open it on their phone – read-only</small></button>
+  </div>
+  <div class="card"><h2>Make links work for everyone</h2>
+    ${web && !sv ? `<p class="muted" style="margin-top:0">✅ This page is already online, so links use <b>${esc(location.href.split('#')[0])}</b></p>` :
+        `<p class="muted" style="margin-top:0">Links need a web address that all players can open. Host this file once (steps below), paste the address here, and every WhatsApp link will point to it.</p>`}
+    <div class="urlrow"><input type="text" id="appUrl" inputmode="url" placeholder="https://your-name.github.io/shuttle-mate/" value="${esc(sv)}"><button class="btn sm" onclick="saveAppUrl()">Save</button></div>
+    <div class="note"><b>Free hosting (GitHub Pages):</b><br>
+      1. Create a GitHub repository and upload this file as <b>index.html</b>.<br>
+      2. Settings › Pages › deploy from the <b>main</b> branch.<br>
+      3. Copy the https://…github.io address and paste it above.<br>
+      Alternatives: Netlify Drop, Cloudflare Pages or Azure Static Web Apps.</div>
+  </div>
+  <div class="card"><h2>More options</h2>
+    <button class="btn sec" onclick="shareResults()">📣 Share via phone share sheet<small>Teams, SMS, email, etc.</small></button>
+    ${readOnly ? '' : `<button class="btn sec" onclick="shareLink(false)">✍️ Share editable link<small>Lets a co-scorer continue from your data</small></button>`}
+    <button class="btn sec" onclick="exportCSV()">⬇️ Download all results incl. play games (CSV)</button>
+    <div class="note"><b>Tip:</b> use <i>Add to Home Screen</i> in your phone browser to open it like an app. Data is saved on your device automatically – use <b>Setup › Backup &amp; restore</b> to keep a safe copy.</div>
+    <p class="muted" style="text-align:center;margin-bottom:0">App version: <b>${APP_VERSION}</b> · ${esc(location.protocol === 'file:' ? 'local file' : location.host)}</p>
+  </div>`;
+}
+function renderSetup() {
+    if (readOnly) {
+        $('setup').innerHTML = '';
+        return;
+    }
+    let h = `<div class="card"><h2>Add a player</h2><div class="row2"><input type="text" id="newPlayer" placeholder="Player name" maxlength="40" autocomplete="off" onkeydown="if(event.key==='Enter')addPlayer()">
+    <button class="btn sm" onclick="addPlayer()">＋ Add</button></div>
+    <p class="muted" style="margin-bottom:0">Any number of players from ${MIN_PLAYERS} to ${MAX_PLAYERS}. The new player is ticked as available on upcoming sessions that haven’t been paired yet. Players who already played are made inactive when removed, so past scores and stats stay intact.</p></div>
+  <div class="card"><h2>Players · ${activeCount()} active${np() !== activeCount() ? ' / ' + np() + ' total' : ''}</h2>`;
+    state.players.forEach((n, i) => {
+        const on = isActive(i);
+        h += `<div class="prow ${on ? '' : 'off'}"><input type="text" id="pn${i}" value="${esc(n)}" maxlength="40" autocomplete="off" aria-label="Player ${i + 1} name">
+      ${on ? `<button class="btn danger" onclick="removePlayer(${i})">Remove</button>` : `<span class="badge">inactive</span><button class="btn sec" onclick="reactivatePlayer(${i})">Restore</button>`}</div>`;
+    });
+    h += `<button class="btn" onclick="renameOnly()">Save name changes</button>
+  <p class="muted">Renaming keeps all pairs and scores.</p></div>
+  <div class="card"><h2>🔔 Sound &amp; vibration</h2><label class="fxrow"><input type="checkbox" ${fxOn ? 'checked' : ''} onchange="setFx(this.checked)"><span>Soft tick and vibration on Start, Finish and when a score is saved.<br><span class="muted">Vibration isn’t available on iPhone Safari.</span></span></label></div>
+  ${cloudCardHTML()}
+  <div class="card" id="bkCard"><h2>💾 Backup &amp; restore</h2>
+    <p class="muted" style="margin-top:0">Your players, sessions, pairs and scores are stored only in this browser. A backup file lets you keep a safe copy, move to a new phone, or carry your data from this file to a hosted copy of the app.</p>
+    <div class="bkstat" id="bkStatus">${bkStatusHTML()}</div>
+    <button class="btn" onclick="downloadBackup()">⬇️ Download backup file<small>Saves a .json file to your Downloads folder</small></button>
+    <button class="btn sec" onclick="shareBackup()">📤 Share backup file<small>WhatsApp, Teams, OneDrive, email…</small></button>
+    <button class="btn sec" onclick="copyBackup()">📋 Copy backup as text</button>
+    <h3>Restore from a backup</h3>
+    <input type="file" id="bkFile" accept=".json,.txt,application/json,text/plain" hidden onchange="pickBackup(this)">
+    <button class="btn sec" onclick="document.getElementById('bkFile').click()">📂 Choose backup file…<small>Replaces the data on this device (a restore point is kept)</small></button>
+    <p class="muted" style="margin:12px 0 6px">Or paste backup text:</p>
+    <textarea id="bkText" rows="3" placeholder='{"app":"badminton-tracker", …}' autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+    <button class="btn sec" onclick="restoreFromText()">Restore from pasted text</button>
+    <h3>Restore points</h3>
+    <div id="snapList"></div>
+  </div>
+  <div class="card"><h2>Reset</h2><button class="btn danger" onclick="resetAll()">Clear all sessions &amp; scores</button>
+    <p class="muted" style="margin-bottom:0">A restore point is saved first, so this can be undone from Restore points above.</p></div>`;
+    $('setup').innerHTML = h;
+    renderSnaps();
+    updateCloudUI();
+}
+function renderBanner() {
+    const conflict = (!readOnly && cloudConflictVersion !== null)
+        ? `<div class="banner">☁️ <b>The cloud and this device have different changes.</b> Pick the copy you want to keep – the other one is saved as a restore point.
+        <button class="btn" onclick="cloudUseCloud()">Use the cloud copy</button><button class="btn sec" onclick="cloudKeepLocal()">Keep this device (overwrite cloud)</button></div>` : '';
+    $('banner').innerHTML = readOnly
+        ? `<div class="banner">👀 <b>Read-only view</b> – a snapshot shared with you.<button class="btn" onclick="makeCopy()">Make my own editable copy</button></div>` : conflict;
+    $('navSetup').style.display = readOnly ? 'none' : '';
+    $('navAvail').style.display = readOnly ? 'none' : '';
+}
+/* ---------- player management & reset ---------- */
+const nameTaken = (nm, skip) => state.players.some((p, i) => i !== skip && p.toLowerCase() === nm.toLowerCase());
+function renameOnly() {
+    const names = state.players.map((n, i) => { const el = $in('pn' + i); return (el && el.value.trim().slice(0, 40)) || n; });
+    const low = names.map(x => x.toLowerCase());
+    if (new Set(low).size !== low.length) {
+        toast('Each player needs a unique name');
+        return;
+    }
+    state.players = names;
+    save();
+    renderAll();
+    toast('Names updated');
+}
+function addPlayer() {
+    const el = $in('newPlayer'), name = ((el && el.value) || '').trim().slice(0, 40);
+    if (!name) {
+        toast('Type a name first');
+        return;
+    }
+    if (np() >= MAX_PLAYERS) {
+        toast('Maximum ' + MAX_PLAYERS + ' players');
+        return;
+    }
+    if (nameTaken(name, -1)) {
+        toast('That name is already in the list');
+        return;
+    }
+    state.players.push(name);
+    state.active.push(true);
+    state.sessions.forEach(x => x.a.push(!x.f && !x.p));
+    save();
+    renderAll();
+    toast(name + ' added – tick them on the Avail tab where needed');
+}
+async function removePlayer(i) {
+    const name = state.players[i];
+    if (isActive(i) && activeCount() <= MIN_PLAYERS) {
+        toast('Keep at least ' + MIN_PLAYERS + ' active players');
+        return;
+    }
+    const played = state.sessions.some(x => x.p && (x.p.some(pr => pr.includes(i)) || x.o.includes(i)));
+    if (played) {
+        if (!await ask(name + ' has played in earlier sessions, so they will be made inactive (hidden from availability; past scores and stats are kept). Continue?'))
+            return;
+        state.active[i] = false;
+        state.sessions.forEach(x => { if (!x.f && !x.p)
+            x.a[i] = false; });
+        const inOpen = state.sessions.some(x => !x.f && x.p && !x.g && (x.p.some(pr => pr.includes(i)) || x.o.includes(i)));
+        save();
+        renderAll();
+        toast(name + ' is now inactive' + (inOpen ? ' – re-pair the open session if they can’t play' : ''));
+        return;
+    }
+    if (np() - 1 < MIN_PLAYERS) {
+        toast('Keep at least ' + MIN_PLAYERS + ' players');
+        return;
+    }
+    if (!await ask('Remove ' + name + ' from the player list?'))
+        return;
+    snap('before removing ' + name);
+    const fix = (v) => v > i ? v - 1 : v;
+    state.players.splice(i, 1);
+    state.active.splice(i, 1);
+    state.sessions.forEach(x => { x.a.splice(i, 1); if (x.p) {
+        x.p = x.p.map(pr => [fix(pr[0]), fix(pr[1])]);
+        x.o = x.o.map(fix);
+    } });
+    playList().forEach(ps => ps.games.forEach(g => { g.players = g.players.map(fix); }));
+    save();
+    renderAll();
+    toast(name + ' removed');
+}
+function reactivatePlayer(i) {
+    state.active[i] = true;
+    state.sessions.forEach(x => { if (!x.f && !x.p)
+        x.a[i] = true; });
+    save();
+    renderAll();
+    toast(state.players[i] + ' restored');
+}
+async function resetAll() {
+    if (!await ask('Delete ALL sessions, pairs and scores?\n\n(A restore point is saved first, so you can undo this from Setup › Restore points.)'))
+        return;
+    snap('before clearing everything');
+    state.sessions = [];
+    state.cur = 0;
+    save();
+    renderAll();
+    show('avail');
+}
+function makeCopy() { readOnly = false; save(); history.replaceState(null, '', location.href.split('#')[0]); renderAll(); show('matches'); toast('Editable copy saved on this device'); }
+
+"use strict";
+/* =====================================================================
+   Cloud sync with Supabase (optional).  Talks to 4 RPC functions only:
+   shuttle_load / shuttle_save / shuttle_list_history / shuttle_get_history
+   – no Supabase library needed, just fetch().
+   ===================================================================== */
+const CLOUD_CFG_KEY = 'shuttle_cloud_cfg';
+const CLOUD_META_KEY = 'shuttle_cloud_meta';
+const CLOUD_DEV_KEY = 'shuttle_device';
+const SPACE_RE = /^[a-z0-9][a-z0-9_-]{1,39}$/;
+let cloudSt = 'off';
+let cloudMsg = '';
+let cloudMeta = loadCloudMeta();
+let cloudConflictVersion = null;
+let cloudInitDone = false, cloudBusy = false, cloudAgain = false, cloudSeq = 0;
+let cloudPushTimer = 0, cloudRetryTimer = 0, cloudLastSoft = 0;
+function loadCloudMeta() {
+    try {
+        const m = JSON.parse(localStorage.getItem(CLOUD_META_KEY) || 'null');
+        if (m && typeof m.version === 'number')
+            return { version: m.version, dirty: !!m.dirty, at: +m.at || 0 };
+    }
+    catch (e) { /* ignore */ }
+    return { version: 0, dirty: false, at: 0 };
+}
+function saveCloudMeta() { try {
+    localStorage.setItem(CLOUD_META_KEY, JSON.stringify(cloudMeta));
+}
+catch (e) { /* ignore */ } }
+function cloudCfg() {
+    let st = {};
+    try {
+        st = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY) || '{}') || {};
+    }
+    catch (e) { /* ignore */ }
+    const html = window.SHUTTLE_CONFIG || {};
+    return {
+        url: String(st.url || html.supabaseUrl || '').trim().replace(/\/+$/, ''),
+        key: String(st.key || html.supabaseAnonKey || '').trim(),
+        space: String(st.space || html.space || 'badminton').trim().toLowerCase(),
+        pin: String(st.pin || ''),
+        auto: st.auto !== false,
+    };
+}
+const cloudConfigured = () => { const c = cloudCfg(); return !!(c.url && c.key && c.space && c.pin) && !readOnly; };
+const cloudAuto = () => cloudConfigured() && cloudCfg().auto;
+function deviceLabel() {
+    let d = '';
+    try {
+        d = localStorage.getItem(CLOUD_DEV_KEY) || '';
+    }
+    catch (e) { /* ignore */ }
+    if (!d) {
+        const ua = navigator.userAgent;
+        const os = /iPhone|iPad/.test(ua) ? 'iPhone' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : 'Device';
+        d = os + ' · ' + Math.random().toString(36).slice(2, 6);
+        try {
+            localStorage.setItem(CLOUD_DEV_KEY, d);
+        }
+        catch (e) { /* ignore */ }
+    }
+    return d;
+}
+/* ---------- low-level RPC ---------- */
+async function cloudRpc(fn, body) {
+    const c = cloudCfg();
+    const ctl = new AbortController();
+    const t = window.setTimeout(() => ctl.abort(), 20000);
+    const headers = { 'Content-Type': 'application/json', apikey: c.key };
+    if (c.key.startsWith('eyJ'))
+        headers.Authorization = 'Bearer ' + c.key; // legacy JWT anon keys; new sb_publishable_ keys use apikey only
+    try {
+        const res = await fetch(c.url + '/rest/v1/rpc/' + fn, { method: 'POST', headers, body: JSON.stringify(body), signal: ctl.signal });
+        const txt = await res.text();
+        let j = null;
+        try {
+            j = txt ? JSON.parse(txt) : null;
+        }
+        catch (e) { /* ignore */ }
+        if (!res.ok)
+            throw new Error((j && (j.message || j.hint || j.error)) || ('HTTP ' + res.status));
+        return j;
+    }
+    finally {
+        window.clearTimeout(t);
+    }
+}
+const cloudArgs = () => { const c = cloudCfg(); return { p_space: c.space, p_pin: c.pin }; };
+/* ---------- flat list of scored games for SQL reporting ---------- */
+function buildGameRows() {
+    const out = [];
+    const P = state.players;
+    state.sessions.forEach(s => {
+        if (!s.p)
+            return;
+        const pairs = s.p;
+        let n = 0;
+        scheduleOf(s).forEach((rd, r) => rd.ms.forEach((m, i) => {
+            const k = r + '-' + i;
+            if (!isDone(s, k))
+                return;
+            const c = s.c[k], A = pairs[m.a], B = pairs[m.b];
+            out.push({ source: 'session', session_ref: 's' + s.id, game_date: s.d, session_finished: s.f, round_no: r + 1, game_no: ++n, court: m.court,
+                a1: P[A[0]], a2: P[A[1]], b1: P[B[0]], b2: P[B[1]], score_a: c[0], score_b: c[1], played_at: null });
+        }));
+    });
+    playList().forEach(ps => (ps.games || []).forEach((g, n) => {
+        if (!g.ended || g.score[0] === null || g.score[1] === null)
+            return;
+        out.push({ source: 'play', session_ref: 'p' + ps.id, game_date: ps.date, session_finished: !!ps.ended, round_no: null, game_no: n + 1, court: g.court,
+            a1: P[g.players[0]], a2: P[g.players[1]], b1: P[g.players[2]], b2: P[g.players[3]], score_a: g.score[0], score_b: g.score[1], played_at: new Date(g.ended).toISOString() });
+    }));
+    return out;
+}
+const hasRealData = (st) => st.sessions.some(s => s.g || s.f || doneCount(s) > 0) || (st.playSessions || []).length > 0;
+/* ---------- status ---------- */
+function setCloud(st, msg) { cloudSt = st; cloudMsg = msg || ''; updateCloudUI(); }
+function cloudStatusText() {
+    const when = cloudMeta.at ? fmtWhen(cloudMeta.at) : '';
+    switch (cloudSt) {
+        case 'off': return cloudConfigured() ? 'Connected settings saved.' : 'Not connected – data is saved on this device only.';
+        case 'idle': return '✅ Synced' + (when ? ' · ' + esc(when) : '');
+        case 'syncing': return '🔄 Syncing…';
+        case 'pending': return cloudAuto() ? '⏳ Changes waiting to sync…' : '⏳ Changes not synced yet – tap Sync now.';
+        case 'conflict': return '⚠️ Cloud and this device have different changes – choose which to keep (banner at the top).';
+        default: return '⚠️ ' + esc(cloudMsg || 'Sync problem');
+    }
+}
+function updateCloudUI() {
+    const dot = document.getElementById('syncDot');
+    if (dot) {
+        const show = cloudConfigured();
+        dot.hidden = !show;
+        dot.dataset.s = cloudSt;
+        const lg = dot.parentElement;
+        if (lg)
+            lg.title = 'Cloud: ' + cloudStatusText().replace(/<[^>]+>/g, '');
+    }
+    const el = document.getElementById('cloudStatus');
+    if (el)
+        el.innerHTML = cloudStatusText();
+    const b = document.getElementById('banner');
+    if (b && typeof renderBanner === 'function')
+        renderBanner();
+}
+/* ---------- change tracking & push ---------- */
+function cloudMarkDirty() {
+    if (readOnly)
+        return;
+    cloudSeq++;
+    cloudMeta.dirty = true;
+    saveCloudMeta();
+    if (!cloudConfigured() || !cloudInitDone || cloudConflictVersion !== null)
+        return;
+    setCloud('pending');
+    if (cloudAuto())
+        cloudSchedulePush(1500);
+}
+function cloudSchedulePush(ms) {
+    window.clearTimeout(cloudPushTimer);
+    cloudPushTimer = window.setTimeout(() => { void cloudPush(); }, ms);
+}
+function cloudFail(r) {
+    const e = String((r && r.error) || 'error');
+    if (e === 'bad_pin')
+        setCloud('error', 'Wrong passcode – fix it in Setup › Cloud database.');
+    else if (e === 'locked')
+        setCloud('error', 'Too many wrong passcodes – try again in 5 minutes.');
+    else if (e === 'too_large')
+        setCloud('error', 'Data is too large to sync.');
+    else
+        setCloud('error', 'Server rejected the data (' + e + ').');
+}
+function cloudNetFail(e) {
+    const m = e?.message || '';
+    if (/Could not find the function|PGRST202|schema cache/i.test(m)) {
+        setCloud('error', 'Database not set up yet – run the SQL scripts in Supabase first.');
+        return;
+    }
+    if (/Invalid API key|JWT|apikey/i.test(m)) {
+        setCloud('error', 'Supabase rejected the API key – check it in Setup.');
+        return;
+    }
+    setCloud('error', navigator.onLine ? ('Could not reach Supabase (' + (m || 'network') + ') – will retry.') : 'Offline – will sync when you are back online.');
+    window.clearTimeout(cloudRetryTimer);
+    cloudRetryTimer = window.setTimeout(() => { if (cloudMeta.dirty)
+        void cloudPush(); }, 25000);
+}
+async function cloudPush(keepHistory = false) {
+    if (!cloudConfigured() || cloudConflictVersion !== null)
+        return false;
+    if (cloudBusy) {
+        cloudAgain = true;
+        return false;
+    }
+    cloudBusy = true;
+    setCloud('syncing');
+    const seq = cloudSeq;
+    let ok = false;
+    try {
+        const r = await cloudRpc('shuttle_save', { ...cloudArgs(), p_data: state, p_games: buildGameRows(),
+            p_expected_version: cloudMeta.version, p_device: deviceLabel(), p_keep_history: keepHistory });
+        if (r && r.ok) {
+            cloudMeta.version = r.version;
+            cloudMeta.at = Date.now();
+            cloudMeta.dirty = seq !== cloudSeq;
+            saveCloudMeta();
+            ok = true;
+            setCloud(cloudMeta.dirty ? 'pending' : 'idle');
+            if (cloudMeta.dirty && cloudAuto())
+                cloudSchedulePush(800);
+        }
+        else if (r && r.error === 'version_conflict') {
+            cloudConflictVersion = r.version;
+            setCloud('conflict');
+        }
+        else
+            cloudFail(r);
+    }
+    catch (e) {
+        cloudNetFail(e);
+    }
+    finally {
+        cloudBusy = false;
+        if (cloudAgain) {
+            cloudAgain = false;
+            if (cloudAuto())
+                cloudSchedulePush(300);
+        }
+    }
+    return ok;
+}
+/* ---------- pull / merge ---------- */
+function cloudAdopt(st, version, why) {
+    if (hasRealData(state) && JSON.stringify(state) !== JSON.stringify(st))
+        snap(why);
+    state = st;
+    try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+    }
+    catch (e) { /* ignore */ }
+    cloudMeta = { version, dirty: false, at: Date.now() };
+    saveCloudMeta();
+    cloudConflictVersion = null;
+    renderAll();
+    setCloud('idle');
+}
+async function cloudPull(quiet) {
+    if (!cloudConfigured())
+        return;
+    if (cloudBusy)
+        return;
+    cloudBusy = true;
+    setCloud('syncing');
+    let after = 'none';
+    try {
+        const r = await cloudRpc('shuttle_load', cloudArgs());
+        if (!r || !r.ok) {
+            cloudFail(r);
+            return;
+        }
+        const cv = r.version;
+        if (cv === 0 || !r.data) {
+            cloudMeta.version = 0;
+            cloudMeta.dirty = true;
+            saveCloudMeta();
+            after = 'push';
+            return;
+        } // cloud empty -> upload this device
+        const st = normalizeState(r.data);
+        if (!st) {
+            setCloud('error', 'Cloud data could not be read.');
+            return;
+        }
+        if (cv === cloudMeta.version) {
+            if (cloudMeta.dirty)
+                after = 'push';
+            else {
+                cloudMeta.at = Date.now();
+                saveCloudMeta();
+                setCloud('idle');
+            }
+            return;
+        }
+        const localChanged = cloudMeta.dirty && (cloudMeta.version > 0 || hasRealData(state));
+        if (!localChanged) {
+            if (PE || document.querySelector('.dlg-ov')) {
+                setCloud('idle');
+                return;
+            } // don't swap data under an open dialog
+            cloudAdopt(st, cv, 'before loading the cloud copy');
+            if (!quiet)
+                toast('Loaded from cloud ☁️');
+            else
+                toast('Updated from cloud ☁️');
+            return;
+        }
+        cloudConflictVersion = cv;
+        setCloud('conflict');
+    }
+    catch (e) {
+        cloudNetFail(e);
+    }
+    finally {
+        cloudBusy = false;
+        if (after === 'push')
+            await cloudPush();
+    }
+}
+async function cloudInit() {
+    if (!cloudConfigured()) {
+        cloudInitDone = true;
+        setCloud('off');
+        return;
+    }
+    try {
+        await cloudPull(true);
+    }
+    finally {
+        cloudInitDone = true;
+    }
+}
+async function cloudSyncNow() {
+    if (!cloudConfigured()) {
+        toast('Cloud not set up – see Setup › Cloud database');
+        return;
+    }
+    if (cloudConflictVersion !== null) {
+        toast('Resolve the cloud conflict first (banner at the top)');
+        return;
+    }
+    if (cloudBusy) {
+        toast('Already syncing…');
+        return;
+    }
+    cloudInitDone = true;
+    await cloudPull(false);
+    if (cloudSt === 'idle')
+        toast('Synced ✅');
+}
+function cloudSoftSync() {
+    if (!cloudInitDone || cloudBusy || cloudConflictVersion !== null || !cloudConfigured())
+        return;
+    if (Date.now() - cloudLastSoft < 15000)
+        return;
+    cloudLastSoft = Date.now();
+    void cloudPull(true);
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible')
+    cloudSoftSync(); });
+window.addEventListener('online', () => { if (cloudMeta.dirty && cloudAuto() && cloudInitDone)
+    cloudSchedulePush(500);
+else
+    cloudSoftSync(); });
+/* ---------- conflict resolution (banner buttons) ---------- */
+async function cloudUseCloud() {
+    if (!cloudConfigured())
+        return;
+    try {
+        const r = await cloudRpc('shuttle_load', cloudArgs());
+        if (!r || !r.ok || !r.data) {
+            cloudFail(r);
+            return;
+        }
+        const st = normalizeState(r.data);
+        if (!st) {
+            setCloud('error', 'Cloud data could not be read.');
+            return;
+        }
+        cloudAdopt(st, r.version, 'before loading the cloud copy');
+        toast('Loaded the cloud copy ☁️');
+    }
+    catch (e) {
+        cloudNetFail(e);
+    }
+}
+async function cloudKeepLocal() {
+    if (cloudConflictVersion === null)
+        return;
+    cloudMeta.version = cloudConflictVersion;
+    cloudMeta.dirty = true;
+    saveCloudMeta();
+    cloudConflictVersion = null;
+    renderBanner();
+    if (await cloudPush(true))
+        toast('This device’s data is now in the cloud ✅ (old cloud copy kept in versions)');
+}
+/* ---------- settings screen actions ---------- */
+async function cloudSaveSettings() {
+    const v = (id) => (($in(id) || { value: '' }).value || '').trim();
+    const url = v('cfUrl').replace(/\/+$/, ''), key = v('cfKey'), space = v('cfSpace').toLowerCase(), pin = ($in('cfPin') || { value: '' }).value;
+    if (!/^(https:\/\/[^\s/]+\.[^\s/]+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)/i.test(url)) {
+        toast('Project URL should look like https://xxxx.supabase.co');
+        return;
+    }
+    if (key.length < 20) {
+        toast('Paste the anon / publishable key');
+        return;
+    }
+    if (!SPACE_RE.test(space)) {
+        toast('Space: 2-40 chars, lowercase letters, numbers, - or _');
+        return;
+    }
+    if (pin.length < 4) {
+        toast('Passcode must be at least 4 characters');
+        return;
+    }
+    const prev = cloudCfg(), auto = ($in('cfAuto') || { checked: true }).checked;
+    try {
+        localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ url, key, space, pin, auto }));
+    }
+    catch (e) { /* ignore */ }
+    if (prev.url !== url || prev.space !== space) {
+        cloudMeta = { version: 0, dirty: true, at: 0 };
+        saveCloudMeta();
+        cloudConflictVersion = null;
+    }
+    cloudInitDone = false;
+    toast('Connecting…');
+    await cloudInit();
+    if (cloudSt === 'idle')
+        toast('Connected to Supabase ✅');
+    renderBanner();
+}
+async function cloudDisconnect() {
+    if (!await ask('Disconnect from the cloud on this device?\n\nYour data stays on this device and in Supabase. The saved passcode and settings are removed from this browser.'))
+        return;
+    try {
+        localStorage.removeItem(CLOUD_CFG_KEY);
+    }
+    catch (e) { /* ignore */ }
+    cloudMeta = { version: 0, dirty: false, at: 0 };
+    saveCloudMeta();
+    cloudConflictVersion = null;
+    window.clearTimeout(cloudPushTimer);
+    setCloud('off');
+    renderSetup();
+    toast('Disconnected');
+}
+function cloudToggleAuto(on) {
+    const c = cloudCfg();
+    try {
+        localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ ...c, auto: on }));
+    }
+    catch (e) { /* ignore */ }
+    if (on && cloudMeta.dirty && cloudInitDone)
+        cloudSchedulePush(300);
+    updateCloudUI();
+}
+async function cloudShowHistory() {
+    const el = document.getElementById('cloudHist');
+    if (!el)
+        return;
+    if (!cloudConfigured()) {
+        toast('Connect to the cloud first');
+        return;
+    }
+    el.innerHTML = '<p class="muted">Loading…</p>';
+    try {
+        const r = await cloudRpc('shuttle_list_history', cloudArgs());
+        if (!r || !r.ok) {
+            cloudFail(r);
+            el.innerHTML = '';
+            return;
+        }
+        const items = r.items || [];
+        el.innerHTML = items.length ? items.map(x => `<div class="snap"><div><b>${esc(fmtWhen(x.saved_at))}</b><br><span class="muted">version ${x.version}${x.saved_by ? ' · ' + esc(x.saved_by) : ''} · ${Math.round(x.bytes / 1024)} KB</span></div>
+      <button class="btn sec" onclick="cloudLoadVersion(${x.id})">Load</button></div>`).join('')
+            : '<p class="muted" style="margin:8px 0 0">No earlier versions yet – the server keeps a copy of replaced data automatically (about one every 15 minutes).</p>';
+    }
+    catch (e) {
+        el.innerHTML = '';
+        cloudNetFail(e);
+    }
+}
+async function cloudLoadVersion(id) {
+    try {
+        const r = await cloudRpc('shuttle_get_history', { ...cloudArgs(), p_id: id });
+        if (!r || !r.ok) {
+            cloudFail(r);
+            return;
+        }
+        const st = normalizeState(r.data);
+        if (!st) {
+            warn('That version can’t be read.');
+            return;
+        }
+        if (!await ask('Load the cloud version from ' + fmtWhen(r.saved_at) + '?\n\n' + describeState(st) + '\n\nYour current data is kept as a restore point and the cloud keeps its own copy too.'))
+            return;
+        snap('before loading cloud version ' + fmtWhen(r.saved_at));
+        state = st;
+        save();
+        renderAll();
+        await cloudPush(true);
+        toast('Version loaded ☁️');
+    }
+    catch (e) {
+        cloudNetFail(e);
+    }
+}
+function cloudCardHTML() {
+    const c = cloudCfg();
+    return `<div class="card" id="cloudCard"><h2>☁️ Cloud database (Supabase)</h2>
+    <p class="muted" style="margin-top:0">Keeps all sessions, scores and Play games in your own Supabase database, so nothing is lost when the browser is cleared and every device sees the same data.</p>
+    <div class="bkstat" id="cloudStatus">${cloudStatusText()}</div>
+    <h3>Project URL</h3><input type="text" id="cfUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://xxxxxxxx.supabase.co" value="${esc(c.url)}">
+    <h3>Anon / publishable key</h3><input type="text" id="cfKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="eyJ… or sb_publishable_…" value="${esc(c.key)}">
+    <h3>Space name</h3><input type="text" id="cfSpace" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="badminton" value="${esc(c.space)}">
+    <h3>Passcode</h3><input type="password" id="cfPin" autocomplete="off" placeholder="the passcode you set in SQL part 2" value="${esc(c.pin)}">
+    <label class="fxrow" style="margin-top:12px"><input type="checkbox" id="cfAuto" ${c.auto ? 'checked' : ''} onchange="cloudToggleAuto(this.checked)"><span>Sync automatically after every change</span></label>
+    <button class="btn" onclick="cloudSaveSettings()">🔌 Save &amp; connect</button>
+    <button class="btn sec" onclick="cloudSyncNow()">🔄 Sync now</button>
+    <button class="btn sec" onclick="cloudShowHistory()">🕘 Earlier cloud versions</button>
+    <div id="cloudHist"></div>
+    <button class="btn sec" onclick="cloudDisconnect()">Disconnect this device</button>
+    <p class="muted" style="margin:10px 0 0">The anon key is meant to be public; your data is protected by the passcode (5 wrong tries lock the space for 5 minutes). The passcode is stored only in this browser.</p></div>`;
+}
+
+"use strict";
+/* ---------- nav / boot ---------- */
+function show(t) {
+    if (t === 'history')
+        renderHistory();
+    if (t === 'standings')
+        renderStandings();
+    if (t === 'players')
+        renderPlayers();
+    document.querySelectorAll('main section').forEach(s => { s.hidden = s.id !== t; });
+    document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+    window.scrollTo(0, 0);
+}
+$('nav').addEventListener('click', e => {
+    const b = e.target.closest('button[data-t]');
+    if (b)
+        show(b.dataset.t);
+});
+$('hdrShare').addEventListener('click', () => shareResults());
+$('logoBtn').addEventListener('click', () => { if (cloudConfigured())
+    void cloudSyncNow(); });
+/* press-and-hold on score +/- buttons */
+(function holdButtons() {
+    const host = $('matches');
+    let tmr = 0, rep = 0;
+    const stop = () => { window.clearTimeout(tmr); window.clearInterval(rep); tmr = rep = 0; };
+    const get = (b) => [+b.dataset.r, +b.dataset.m, +b.dataset.s, +b.dataset.d];
+    host.addEventListener('pointerdown', e => {
+        const b = e.target.closest('button.hold');
+        if (!b || e.button > 0)
+            return;
+        e.preventDefault();
+        stop();
+        const a = get(b);
+        if (!bump(...a))
+            return;
+        tmr = window.setTimeout(() => { rep = window.setInterval(() => { if (!bump(...a))
+            stop(); }, 110); }, 420);
+    });
+    host.addEventListener('click', e => { const b = e.target.closest('button.hold'); if (b && e.detail === 0)
+        bump(...get(b)); });
+    host.addEventListener('contextmenu', e => { if (e.target.closest('button.hold'))
+        e.preventDefault(); });
+    ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'mouseup', 'blur'].forEach(t => window.addEventListener(t, stop, true));
+})();
+function renderAll() {
+    renderBanner();
+    renderMatches();
+    renderPlay();
+    renderAvail();
+    renderStandings();
+    renderPlayers();
+    renderHistory();
+    renderShare();
+    renderSetup();
+}
+async function boot() {
+    const incoming = readHash(), local = loadLocal();
+    if (incoming) {
+        if (incoming.ro) {
+            readOnly = true;
+            state = incoming.st;
+        }
+        else {
+            const hasLocal = !!local && local.sessions.length > 0;
+            if (!hasLocal || await ask('Open the shared tracker? This will replace the data saved on this device.\n\n(Tip: back up first from Setup if you want to keep your current data.)')) {
+                if (hasLocal && local)
+                    snap('before opening a shared link', local);
+                state = incoming.st;
+                save();
+            }
+            else
+                state = local;
+            history.replaceState(null, '', location.href.split('#')[0]);
+        }
+    }
+    else if (local)
+        state = local;
+    else {
+        freshState();
+        save();
+    }
+    if (!Array.isArray(state.playSessions))
+        state.playSessions = [];
+    if (!cs() && state.sessions.length)
+        state.cur = state.sessions[state.sessions.length - 1].id;
+    renderAll();
+    void cloudInit();
+}
+void boot();
+
+</script>
 </body>
 </html>
