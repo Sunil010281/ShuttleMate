@@ -113,26 +113,7 @@
   <div class="container">
     <div class="card">
       <h1>Shuttle Mate — Cloud Sync</h1>
-      <div class="grid">
-        <div>
-          <label for="supabaseUrl">Supabase URL</label>
-          <input id="supabaseUrl" type="text" placeholder="https://xxx.supabase.co" />
-        </div>
-        <div>
-          <label for="supabaseAnonKey">Anon / Publishable Key</label>
-          <input id="supabaseAnonKey" type="password" placeholder="anon key" />
-        </div>
-        <div>
-          <label for="spaceName">Space</label>
-          <input id="spaceName" type="text" value="badminton" />
-        </div>
-      </div>
-      <div class="row" style="margin-top: 16px;">
-        <button type="button" id="connectBtn">Connect</button>
-        <button type="button" class="secondary" id="loadBtn">Load from cloud</button>
-        <button type="button" class="secondary" id="saveBtn">Save to cloud</button>
-      </div>
-      <div id="status" class="status">Not connected yet.</div>
+      <div id="status" class="status">Connecting to cloud...</div>
     </div>
 
     <div class="card">
@@ -182,10 +163,7 @@
       playerList: document.getElementById('playerList'),
       sessionList: document.getElementById('sessionList'),
       playerInput: document.getElementById('playerInput'),
-      sessionInput: document.getElementById('sessionInput'),
-      supabaseUrl: document.getElementById('supabaseUrl'),
-      supabaseAnonKey: document.getElementById('supabaseAnonKey'),
-      spaceName: document.getElementById('spaceName')
+      sessionInput: document.getElementById('sessionInput')
     };
 
     function setStatus(message, isError = false, isSyncing = false) {
@@ -233,17 +211,10 @@
       }
     }
 
-    function updateConfigFromInputs() {
-      window.SHUTTLE_CONFIG.supabaseUrl = els.supabaseUrl.value.trim() || DEFAULT_SUPABASE_URL;
-      window.SHUTTLE_CONFIG.supabaseAnonKey = els.supabaseAnonKey.value.trim() || DEFAULT_SUPABASE_ANON_KEY;
-      window.SHUTTLE_CONFIG.space = (els.spaceName.value || DEFAULT_SPACE).trim();
-    }
-
     function initSupabase() {
-      updateConfigFromInputs();
       const cfg = window.SHUTTLE_CONFIG;
       if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-        setStatus('Please enter Supabase URL and anon key.', true);
+        setStatus('Supabase configuration is missing.', true);
         return null;
       }
 
@@ -325,7 +296,6 @@
     }
 
     function scheduleCloudSync() {
-      updateConfigFromInputs();
       if (!window.SHUTTLE_CONFIG.supabaseUrl || !window.SHUTTLE_CONFIG.supabaseAnonKey) return;
       if (!window.supabaseClient) {
         initSupabase();
@@ -337,24 +307,6 @@
         await cloudSaveState();
       }, 800);
     }
-
-    document.getElementById('connectBtn').addEventListener('click', async () => {
-      updateConfigFromInputs();
-      initSupabase();
-      if (window.supabaseClient) {
-        setStatus(`Connected to Supabase for space "${window.SHUTTLE_CONFIG.space}".`);
-        await cloudLoadState();
-        await cloudSaveState();
-      }
-    });
-
-    document.getElementById('saveBtn').addEventListener('click', async () => {
-      await cloudSaveState();
-    });
-
-    document.getElementById('loadBtn').addEventListener('click', async () => {
-      await cloudLoadState();
-    });
 
     document.getElementById('addPlayerBtn').addEventListener('click', () => {
       const name = document.getElementById('playerInput').value.trim();
@@ -379,36 +331,13 @@
     document.addEventListener('DOMContentLoaded', () => {
       const today = new Date().toISOString().slice(0, 10);
       els.sessionInput.value = today;
-      els.supabaseUrl.value = DEFAULT_SUPABASE_URL;
-      els.supabaseAnonKey.value = DEFAULT_SUPABASE_ANON_KEY;
-      els.spaceName.value = DEFAULT_SPACE;
-
       loadLocal();
       renderLists();
 
-      const storedUrl = localStorage.getItem('shuttle_supabase_url');
-      const storedKey = localStorage.getItem('shuttle_supabase_key');
-      const storedSpace = localStorage.getItem('shuttle_supabase_space');
-
-      if (storedUrl) els.supabaseUrl.value = storedUrl;
-      if (storedKey) els.supabaseAnonKey.value = storedKey;
-      if (storedSpace) els.spaceName.value = storedSpace;
-
-      updateConfigFromInputs();
       if (window.SHUTTLE_CONFIG.supabaseUrl && window.SHUTTLE_CONFIG.supabaseAnonKey) {
         initSupabase();
         void cloudLoadState();
         void cloudSaveState();
-      }
-    });
-
-    window.addEventListener('beforeunload', () => {
-      updateConfigFromInputs();
-      localStorage.setItem('shuttle_supabase_url', window.SHUTTLE_CONFIG.supabaseUrl);
-      localStorage.setItem('shuttle_supabase_key', window.SHUTTLE_CONFIG.supabaseAnonKey);
-      localStorage.setItem('shuttle_supabase_space', window.SHUTTLE_CONFIG.space);
-      if (window.supabaseClient) {
-        clearTimeout(cloudSyncTimer);
       }
     });
 
